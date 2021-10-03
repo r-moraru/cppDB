@@ -39,12 +39,9 @@ void write_char_size(std::fstream& file, std::string column_dtype) {
     file.write((char *)&arr_size_i, sizeof(int));
 }
 
-void create_table(std::istream& repl) {
+void create_table(const std::string& table_name, std::istream& repl) {
     // initialize table
     using std::string;
-    string table_name;
-
-    repl >> table_name;
 
     std::fstream file;
     if (!open_file(file, table_name+".tab"))
@@ -80,37 +77,90 @@ void create_table(std::istream& repl) {
     file.close();
 }
 
+void delete_table(const std::string& table_name) {
+    std::string file_name = table_name+".tab";
+    std::filesystem::remove(file_name);
+}
+
 Table::Table(const std::string& table_name): pager(table_name+".tab")  {
-    row_size = 0;
-    name = table_name;
-    std::cout << "Reading from table: " << name << std::endl;
+    n = table_name;
 
     std::vector<std::string> column_data = pager.get_column_data();
 
-
     for (auto i = column_data.begin(); i != column_data.end(); i++) {
-        column_names.push_back(*i++);
-        column_types.push_back(*i++);
+        pager.column_names.push_back(*i++);
+        pager.column_types.push_back(*i++);
 
         std::size_t column_size;
         std::istringstream iss(*i);
         iss >> column_size;
 
-        column_sizes.push_back(column_size);
-        row_size += column_size;
+        pager.column_sizes.push_back(column_size);
+        pager.row_size += column_size;
     }
 }
 
 using namespace std;
 
 void Table::print() {
-    cout << "Table " << name << endl;
+    cout << "Table " << n << endl;
 
-    cout << "row size: " << row_size << endl;
+    cout << "row size: " << pager.row_size << endl;
 
     cout << "columns:\n";
 
-    for (int i = 0; i < column_names.size(); i++) {
-        cout << column_names[i] << "\t" << column_types[i] << "\t" << column_sizes[i] << endl;
+    for (int i = 0; i < pager.column_names.size(); i++) {
+        cout << pager.column_names[i] << "\t" << pager.column_types[i] << "\t" << pager.column_sizes[i] << endl;
     }
+}
+
+std::istream& Table::insert_row(std::istream& repl) {
+    pager.insert_row(repl);
+    return repl;
+}
+
+int get_column_position(const string& column_name,
+                        const vector<string>& column_names) {
+    for (int i = 0; i < column_names.size(); i++) {
+        if (column_name == column_names[i])
+            return i;
+    }
+    return -1;
+}
+
+std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
+    std::string column_name;
+    is >> column_name;
+
+    int column_pos = get_column_position(column_name, pager.column_names);
+
+    if (column_pos == -1) {
+        clog << "Could not find requested column\n";
+        return os;
+    }
+
+    Value val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
+    is >> val;
+
+    vector<vector<Value>> selected_rows = pager.select_rows(column_pos, val);
+
+    os << "Table " << n << "\n";
+    for (auto& row : selected_rows) {
+        for (auto& v : row) {
+            os << v << " ";
+        }
+        os << "\n";
+    }
+
+    return os;
+}
+
+std::istream& Table::update_rows(std::istream& is) {
+
+    return is;
+}
+
+std::istream& Table::delete_rows(std::istream& is) {
+
+    return is;
 }

@@ -8,19 +8,28 @@
 #include <vector>
 #include <fstream>
 #include <string>
+#include "../Value/Value.h"
 #include "../constants.h"
 
 class Pager {
-public:
-    explicit Pager(const std::string& file_name);
-    // separate data from first page into strings: column_name, column_type, column_size
-    std::vector<std::string> get_column_data();
+    friend class Table;
 private:
-    std::fstream file;
+    explicit Pager(const std::string& file_name);
+
+    std::vector<std::string> get_column_data();
+    bool read_next_page();
+    void insert_row(std::istream& repl);
+    std::vector<std::vector<Value>> select_rows(int, const Value&);
+    std::vector<std::vector<Value>> select_rows_from_page(int, const Value&);
+    std::vector<std::vector<Value>> get_page_rows();
+private:
+    std::string file_name;
     char page_data[page_size];
     std::fstream::pos_type page_pos;
-    std::fstream::pos_type row_pos;
+    std::size_t row_size;
+    std::vector<std::string> column_names;
+    std::vector<std::string> column_types;
+    std::vector<std::size_t> column_sizes;
 };
-
 
 #endif //CPPDB_PAGER_H

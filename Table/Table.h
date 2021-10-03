@@ -16,37 +16,21 @@
 
 class Table {
 public:
-    class iterator;
     explicit Table(const std::string&);  // create table object from existing table file
 
     void print();
-    std::ostream& select_rows(std::ostream&, std::string column, Value val);
-    std::istream& insert_rows(std::istream&);
-    void delete_rows(std::string column, Value val);
-    void replace_rows(std::string column, Value old_val, Value new_val);
+    std::istream& insert_row(std::istream&);
+    std::istream& update_rows(std::istream&);
+    std::istream& delete_rows(std::istream&);
+    std::ostream& select_rows(std::ostream&, std::istream&);
 
-    iterator& begin();
-    iterator& end();
+    std::string name() { return n; }
 private:
     Pager pager;
-    std::string name;
-    std::size_t row_size;
-    std::vector<std::string> column_names;
-    std::vector<std::string> column_types;
-    std::vector<std::size_t> column_sizes;
+    std::string n;
 };
 
-void create_table(std::istream& repl);
-
-class Table::iterator {
-    iterator& operator++(); // get next row
-    Row& operator*();
-    Ptr<Row>& operator->();
-    bool operator==(iterator iter);
-private:
-    Pager pager;
-    Ptr<Row> pr;
-};
-
+void create_table(const std::string&, std::istream& repl);
+void delete_table(const std::string& table_name);
 
 #endif //CPPDB_TABLE_H

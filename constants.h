@@ -5,6 +5,6 @@
 #ifndef CPPDB_CONSTANTS_H
 #define CPPDB_CONSTANTS_H
 
-const std::size_t page_size = 4096;
+const std::size_t page_size = 50;
 
 #endif //CPPDB_CONSTANTS_H
