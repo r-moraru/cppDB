@@ -156,11 +156,43 @@ std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
 }
 
 std::istream& Table::update_rows(std::istream& is) {
+    std::string column_name;
+    is >> column_name;
+
+    int column_pos = get_column_position(column_name, pager.column_names);
+
+    if (column_pos == -1) {
+        clog << "Could not find requested column\n";
+        return is;
+    }
+
+    Value old_val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
+    Value new_val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
+
+    is >> old_val >> new_val;
+
+    pager.update_rows(column_pos, old_val, new_val);
 
     return is;
 }
 
+// delete leaves old data in table until it is overwritten
+// should clear bytes of old data to remove artifacts from table
 std::istream& Table::delete_rows(std::istream& is) {
+    std::string column_name;
+    is >> column_name;
+
+    int column_pos = get_column_position(column_name, pager.column_names);
+
+    if (column_pos == -1) {
+        clog << "Could not find requested column\n";
+        return is;
+    }
+
+    Value val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
+    is >> val;
+
+    pager.delete_rows(column_pos, val);
 
     return is;
 }

@@ -2,6 +2,7 @@
 // Created by radua on 9/29/2021.
 //
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -10,6 +11,7 @@
 
 using std::vector;
 using std::string;
+using std::sort;
 
 Pager::Pager(const string& file_name): file_name(file_name),
                                             page_data{0}, row_size(0) {
@@ -214,4 +216,73 @@ std::vector<std::vector<Value>> Pager::get_page_rows() {
     }
 
     return ret;
+}
+
+void Pager::delete_rows_from_page(int pos, const Value& val) {
+    vector<int> deleted_pos;
+
+    vector<vector<Value>> page_rows = get_page_rows();
+
+    for (int i = 0; i < page_rows.size(); i++) {
+        if (page_rows[i][pos] == val) deleted_pos.push_back(i);
+    }
+
+    sort(deleted_pos.begin(), deleted_pos.end(), std::greater<>());
+
+    for (auto& i : deleted_pos) {
+        std::clog << "Deleting row at position " << i << std::endl;
+        memcpy(page_data+sizeof(int)+row_size*i,
+               page_data+*(int *)page_data-row_size,
+               row_size);
+
+        *(int *)page_data -= (int)row_size;
+    }
+
+    // remove artifacts
+    std::size_t iter = *(int *)page_data;
+    memset(page_data+iter, 0, row_size*deleted_pos.size());
+
+    if (!deleted_pos.empty())
+        write_page(file_name, page_data, page_pos);
+}
+
+void Pager::delete_rows(int column_position, const Value& val) {
+    while (read_next_page()) {
+        delete_rows_from_page(column_position, val);
+    }
+}
+
+void Pager::update_rows_from_page(int pos, const Value& old_val, const Value& new_val) {
+    bool updated_rows = false;
+
+    vector<vector<Value>> page_rows = get_page_rows();
+
+    for (int i = 0; i < page_rows.size(); i++) {
+        if (page_rows[i][pos] == old_val) {
+            updated_rows = true;
+            std::cout << "Found a matching row:\n";
+            for (auto& val : page_rows[i]) {
+                std::cout << val << " ";
+            }
+            std::cout << std::endl;
+
+            std::size_t pos_in_row = 0;
+            for (int j = 0; j < pos; j++) pos_in_row += column_sizes[j];
+            std::cout << "Position in row: " << pos_in_row << std::endl;
+
+            std::size_t pos_in_page = sizeof(int) + i*row_size + pos_in_row;
+            std::cout << "Position in page: " << pos_in_page << std::endl;
+
+            write_to_buffer(new_val, page_data+pos_in_page, column_sizes[pos]);
+        }
+    }
+
+    if (updated_rows)
+        write_page(file_name, page_data, page_pos);
+}
+
+void Pager::update_rows(int column_position, const Value& old_value, const Value& new_value) {
+    while (read_next_page()) {
+        update_rows_from_page(column_position, old_value, new_value);
+    }
 }
