@@ -19,6 +19,7 @@ public:
     explicit Table(const std::string&);  // create table object from existing table file
 
     void print();
+    void add_root_node();
     std::istream& insert_row(std::istream&);
     std::istream& update_rows(std::istream&);
     std::istream& delete_rows(std::istream&);

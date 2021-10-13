@@ -23,14 +23,40 @@ Pager::Pager(const string& file_name): file_name(file_name),
 
     file.read(page_data, page_size);
 
+    char *iter = page_data;
+    has_primary_key = *(bool *)iter;
+    iter += sizeof(has_primary_key);
+
+    primary_key_pos = *(int *)iter;
+    iter += sizeof(primary_key_pos);
+
+    root_pos = *(int *)iter;
+    iter += sizeof(root_pos);
+
+    num_valid_pages = *(int *)iter;
+
+    file.seekg(std::ios::end);
+    num_pages = file.tellg() / page_size;
+
     file.close();
+}
+
+void Pager::set_t() {
+    int key_value_size = column_sizes[primary_key_pos] + row_size;
+    int empty_room = page_size-BTREENODE_HEADER_SIZE;
+
+    t = (empty_room+key_value_size)/(2*key_value_size);
+
+    key_value_size = column_sizes[primary_key_pos] + sizeof(int);
+
+    t = std::min(t, (int)(empty_room-sizeof(int)+key_value_size)/(2*key_value_size));
 }
 
 vector<string> Pager::get_column_data() {
     vector<string> column_data;
 
-    char* iter1 = page_data;
-    char* iter2 = strchr(page_data, '\0');
+    char* iter1 = page_data + HEADER_SIZE;
+    char* iter2 = strchr(iter1, '\0');
 
     while (iter2 != nullptr && iter2-page_data <= page_size) {
         if (*iter1 == 0)
@@ -94,6 +120,16 @@ bool Pager::read_next_page() {
     return false;
 }
 
+void Pager::read_page_at_pos(int pos) {
+    std::fstream file(file_name,
+                      std::ios::binary |
+                      std::ios::in);
+
+    file.seekg(pos);
+
+    file.read(page_data, page_size);
+}
+
 bool insert_row_in_page(char* page_data, const char* row_data, std::size_t row_size) {
     int first_bit = *(int *)page_data;
     std::clog << "inserting row at position " << first_bit << " in page\n";
@@ -140,17 +176,25 @@ void append_page(const string& file_name) {
 }
 
 void Pager::insert_row(std::istream& repl) {
+    std::vector<Value> row;
     char row_data[row_size];
     memset(row_data, 0, row_size);
-    char *iter = row_data;
 
+    char *iter = row_data;
     for (int i = 0; i < column_names.size(); i++) {
         Value val(column_types[i], column_sizes[i]);
-        // should call virtual function
         repl >> val;
-        write_to_buffer(val, iter, column_sizes[i]);
 
+        write_to_buffer(val, iter, column_sizes[i]);
         iter += column_sizes[i];
+
+        row.push_back(val);
+    }
+
+    if (has_primary_key) {
+        btree.insert(*this, row[primary_key_pos], row);
+        // TODO: otherwise traverse leaf nodes
+        return;
     }
 
     while (!insert_row_in_page(page_data, row_data, row_size)) {
@@ -171,11 +215,24 @@ void Pager::insert_row(std::istream& repl) {
 vector<vector<Value>> Pager::select_rows_from_page(int pos, const Value& val) {
     vector<vector<Value>> ret;
 
-    vector<vector<Value>> page_rows = get_page_rows();
+    if (!has_primary_key) {
+        vector<vector<Value>> page_rows = get_page_rows();
 
-    for (auto& row : page_rows)
-        if (row[pos] == val) ret.push_back(row);
+        for (auto& row : page_rows)
+            if (row[pos] == val) ret.push_back(row);
 
+        return ret;
+    }
+
+    if (pos == primary_key_pos) {
+        vector<Value> row = btree.get_data(*this, val);
+        if (row.size() > 0)
+            ret.push_back(row);
+
+        return ret;
+    }
+
+    // TODO: otherwise, traverse btree leafs
     return ret;
 }
 
@@ -260,19 +317,11 @@ void Pager::update_rows_from_page(int pos, const Value& old_val, const Value& ne
     for (int i = 0; i < page_rows.size(); i++) {
         if (page_rows[i][pos] == old_val) {
             updated_rows = true;
-            std::cout << "Found a matching row:\n";
-            for (auto& val : page_rows[i]) {
-                std::cout << val << " ";
-            }
-            std::cout << std::endl;
 
             std::size_t pos_in_row = 0;
             for (int j = 0; j < pos; j++) pos_in_row += column_sizes[j];
-            std::cout << "Position in row: " << pos_in_row << std::endl;
 
             std::size_t pos_in_page = sizeof(int) + i*row_size + pos_in_row;
-            std::cout << "Position in page: " << pos_in_page << std::endl;
-
             write_to_buffer(new_val, page_data+pos_in_page, column_sizes[pos]);
         }
     }
@@ -285,4 +334,167 @@ void Pager::update_rows(int column_position, const Value& old_value, const Value
     while (read_next_page()) {
         update_rows_from_page(column_position, old_value, new_value);
     }
+}
+
+void Pager::init_btree() {
+    btree.root = read_node(root_pos);
+}
+
+BTreeNode Pager::insert_new_node() {
+    BTreeNode empty_node(t);
+    if (num_valid_pages == num_pages) {
+        append_page(file_name);
+        num_pages++;
+    }
+
+    empty_node.pos = num_valid_pages;
+    write_node_data(empty_node);
+
+    num_valid_pages++;
+
+    return empty_node;
+}
+
+BTreeNode Pager::read_node(int node_pos) {
+    BTreeNode node(t);
+    node.pos = node_pos;
+
+    read_page_at_pos(node_pos);
+
+    char *iter = page_data;
+
+    node.is_leaf = *(bool *)iter;
+    iter += sizeof(node.is_leaf);
+
+    node.n = *(int *)iter;
+    iter += sizeof(node.n);
+
+    node.pos = *(int *)iter;
+    iter += sizeof(node.n);
+
+    node.parent_pos = *(int *)iter;
+    iter += sizeof(node.parent_pos);
+
+    node.next_leaf = *(int *)iter;
+    iter += sizeof(node.next_leaf);
+
+    for (int i = 0; i < node.n; i++) {
+        Value val(column_types[primary_key_pos],
+                  column_sizes[primary_key_pos]);
+        read_from_buffer(val, iter, column_sizes[primary_key_pos]);
+
+        node.keys[i] = val;
+
+        iter += column_sizes[primary_key_pos];
+    }
+    if (node.is_leaf) {
+        for (int i = 0; i < node.n; i++) {
+            for (int j = 0; j < column_names.size(); j++) {
+                Value val(column_types[j], column_sizes[j]);
+                read_from_buffer(val, iter, column_sizes[j]);
+
+                node.data[i].push_back(val);
+
+                iter += column_sizes[j];
+            }
+        }
+    }
+    else {
+        for (int i = 0; i <= node.n; i++) {
+            node.c[i] = *(int *)iter;
+            iter += sizeof(node.c[i]);
+        }
+    }
+
+    return node;
+}
+
+void Pager::write_node_data(const BTreeNode &node) {
+    char page_buffer[page_size] = {0};
+
+    char *iter = page_buffer;
+
+    *(bool *)iter = node.is_leaf;
+    iter += sizeof(node.is_leaf);
+
+    *(int *)iter = node.n;
+    iter += sizeof(node.n);
+
+    *(int *)iter = node.pos;
+    iter += sizeof(node.pos);
+
+    *(int *)iter = node.parent_pos;
+    iter += sizeof(node.parent_pos);
+
+    *(int *)iter = node.next_leaf;
+    iter += sizeof (node.next_leaf);
+
+    for (int i = 0; i < node.n; i++) {
+        write_to_buffer(node.keys[i], iter,
+                        column_sizes[primary_key_pos]);
+        iter += column_sizes[primary_key_pos];
+    }
+    if (node.is_leaf) {
+        for (int i = 0; i < node.n; i++) {
+            for (int j = 0; j < column_names.size(); j++) {
+                write_to_buffer(node.data[i][j], iter, column_sizes[j]);
+                iter += column_sizes[j];
+            }
+        }
+    }
+    else {
+        for (int i = 0; i <= node.n; i++) {
+            *(int *)iter = node.c[i];
+            iter += sizeof(node.c[i]);
+        }
+    }
+
+    write_page(file_name, page_buffer, page_size*node.pos);
+}
+
+void Pager::remove_node(int node_pos) {
+    num_valid_pages--;
+
+    read_page_at_pos(num_valid_pages);
+
+    write_page(file_name, page_data, node_pos);
+
+    if (root_pos == num_valid_pages) {
+        root_pos = node_pos;
+    }
+
+    BTreeNode moved = read_node(node_pos);
+    moved.pos = node_pos;
+
+    if (moved.parent_pos != -1) {
+        BTreeNode parent = read_node(moved.parent_pos);
+        for (int i = 0; i <= parent.n; i++)
+            if (parent.c[i] == num_valid_pages) {
+                parent.c[i] = node_pos;
+                break;
+            }
+    }
+
+    for (int i = 0; i <= moved.n; i++) {
+        BTreeNode child = read_node(moved.c[i]);
+        child.parent_pos = node_pos;
+        write_node_data(child);
+    }
+
+    if (moved.next_leaf != -1) {
+        BTreeNode nl = read_node(moved.next_leaf);
+        nl.prev_leaf = node_pos;
+        write_node_data(nl);
+    }
+    if (moved.prev_leaf != -1) {
+        BTreeNode pl = read_node(moved.prev_leaf);
+        pl.next_leaf = node_pos;
+        write_node_data(pl);
+    }
+
+    write_node_data(moved);
+}
+
+void Pager::set_btree_root(int node_pos) {
+    root_pos = node_pos;
 }

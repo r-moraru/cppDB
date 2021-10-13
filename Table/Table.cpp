@@ -25,7 +25,7 @@ void write_empty_page(std::fstream& file) {
     file.seekg(0);
 }
 
-void write_char_size(std::fstream& file, std::string column_dtype) {
+void write_char_size(char *page_buffer, std::string column_dtype) {
     std::string::size_type pos = column_dtype.find('(')+1;
 
     std::string arr_size = std::string(column_dtype.begin()+pos,
@@ -36,7 +36,29 @@ void write_char_size(std::fstream& file, std::string column_dtype) {
     int arr_size_i;
     iss >> arr_size_i;
 
-    file.write((char *)&arr_size_i, sizeof(int));
+    memcpy(page_buffer, &arr_size_i, sizeof(arr_size_i));
+}
+
+void generate_file_header(char *page_buffer, std::istream& repl) {
+    bool has_primary_key;
+    int primary_key_pos = -1;
+
+    repl >> has_primary_key;
+
+    if (has_primary_key)
+        repl >> primary_key_pos;
+
+    memcpy(page_buffer, &has_primary_key, sizeof(has_primary_key));
+    page_buffer += sizeof(has_primary_key);
+
+    memcpy(page_buffer, &primary_key_pos, sizeof(primary_key_pos));
+    page_buffer += sizeof(primary_key_pos);
+
+    int pos = 1;
+    memcpy(page_buffer, &pos, sizeof(pos));
+    page_buffer += sizeof(pos);
+
+    memcpy(page_buffer, &pos, sizeof(pos));
 }
 
 void create_table(const std::string& table_name, std::istream& repl) {
@@ -47,11 +69,15 @@ void create_table(const std::string& table_name, std::istream& repl) {
     if (!open_file(file, table_name+".tab"))
         return;
 
-    write_empty_page(file);
+    char page_buffer[page_size] = {0};
+
+    generate_file_header(page_buffer, repl);
+    char *iter = page_buffer + HEADER_SIZE;
 
     string column_name, column_dtype;
 
-    // initialize columns
+    // TODO: stop before page overflow
+    // TODO: check if rows exceed page size
     while (column_name.find(';') == string::npos &&
            column_dtype.find(';') == string::npos) {
         repl >> column_name;
@@ -66,15 +92,30 @@ void create_table(const std::string& table_name, std::istream& repl) {
             continue;
         }
 
-        file.write(column_name.c_str(), column_name.size()+1);
-        file.write(column_dtype.c_str(), 1);
+        memcpy(iter, column_name.c_str(), column_name.size()+1);
+        iter += column_name.size()+1;
+
+        memcpy(iter, column_dtype.c_str(), 1);
+        iter += 1;
 
         if (column_dtype[0] == 'c') {
-            write_char_size(file, column_dtype);
+            write_char_size(iter, column_dtype);
+            iter += sizeof(int);
         }
     }
 
+    file.write(page_buffer, page_size);
     file.close();
+}
+
+void Table::add_root_node() {
+    BTreeNode root = pager.insert_new_node();
+    root.is_leaf = true;
+    root.parent_pos = -1;
+    root.next_leaf = -1;
+    root.n = 0;
+
+    pager.write_node_data(root);
 }
 
 void delete_table(const std::string& table_name) {
@@ -98,12 +139,23 @@ Table::Table(const std::string& table_name): pager(table_name+".tab")  {
         pager.column_sizes.push_back(column_size);
         pager.row_size += column_size;
     }
+
+    if (pager.has_primary_key) {
+        pager.set_t();
+        pager.init_btree();
+    }
 }
 
 using namespace std;
 
 void Table::print() {
     cout << "Table " << n << endl;
+
+    if (pager.has_primary_key) {
+        cout << "Primary key position: " << pager.primary_key_pos << endl;
+        cout << "Position of btree root page: " << pager.root_pos << endl;
+        cout << "Position of first empty page: " << pager.num_valid_pages << endl;
+    }
 
     cout << "row size: " << pager.row_size << endl;
 
@@ -176,8 +228,6 @@ std::istream& Table::update_rows(std::istream& is) {
     return is;
 }
 
-// delete leaves old data in table until it is overwritten
-// should clear bytes of old data to remove artifacts from table
 std::istream& Table::delete_rows(std::istream& is) {
     std::string column_name;
     is >> column_name;

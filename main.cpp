@@ -12,10 +12,15 @@ int main() {
 
         if (command == "create") {
             create_table(table_name, cin);
+            Table table(table_name);
+            table.add_root_node();
             continue;
         }
 
         Table table(table_name);
+
+        table.print();
+
         if (command == "select")        table.select_rows(cout, cin);
         else if (command == "insert")   table.insert_row(cin);
         else if (command == "update")   table.update_rows(cin);

@@ -10,8 +10,12 @@
 
 class Int: public Base {
     bool operator==(const Base& b) override  {
-        const Int& f = dynamic_cast<const Int&>(b);
-        return val == f.val;
+        const Int& s = dynamic_cast<const Int&>(b);
+        return val == s.val;
+    }
+    bool operator<(const Base& b) override {
+        const Int& i = dynamic_cast<const Int&>(b);
+        return val < i.val;
     }
     void read(std::istream &is) override { is >> val; }
     void write(std::ostream &os) override { os << val; }

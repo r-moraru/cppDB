@@ -12,6 +12,7 @@ class Value;
 
 class Base {
     friend bool operator==(const Value&, const Value&);
+    friend bool operator<(const Value& val1, const Value& val2);
     friend std::istream& operator>>(std::istream&, Value&);
     friend std::ostream& operator<<(std::ostream&, Value&);
     friend void read_from_buffer(Value&, char *, std::size_t);
@@ -25,6 +26,7 @@ class Base {
     virtual void write_to_buffer(char *, std::size_t) = 0;
     virtual void read_from_buffer(char *, std::size_t) = 0;
     virtual bool operator==(const Base&) = 0;
+    virtual bool operator<(const Base&) = 0;
 public:
     virtual ~Base() { }
 };

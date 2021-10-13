@@ -13,6 +13,10 @@ class Float: public Base {
         const Float& f = dynamic_cast<const Float&>(b);
         return val == f.val;
     }
+    bool operator<(const Base& b) override {
+        const Float& f = dynamic_cast<const Float&>(b);
+        return val < f.val;
+    }
     void read(std::istream &is) override { is >> val; }
     void write(std::ostream &os) override { os << val; }
     void read_from_buffer(char *buffer, std::size_t) override {
