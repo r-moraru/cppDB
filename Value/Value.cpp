@@ -4,12 +4,12 @@
 
 #include "Value.h"
 
-std::istream& operator>>(std::istream& is, Value& value) {
+std::istream& operator>>(std::istream& is, const Value& value) {
     value.value_ptr->read(is);
     return is;
 }
 
-std::ostream& operator<<(std::ostream& os, Value& value) {
+std::ostream& operator<<(std::ostream& os, const Value& value) {
     value.value_ptr->write(os);
     return os;
 }

@@ -23,7 +23,9 @@ private:
     explicit Pager(const std::string& file_name);
     void set_t();
 
+    void write_header_data();
     std::vector<std::string> get_column_data();
+
     bool read_next_page();
     void insert_row(std::istream& repl);
     void delete_rows(int, const Value&);
@@ -42,6 +44,8 @@ private:
     BTreeNode insert_new_node();
     void write_node_data(const BTreeNode&);
     void remove_node(int node_pos);
+
+    void dfs() { btree.dfs(*this); }
 private:
     int t;
     BTree btree;

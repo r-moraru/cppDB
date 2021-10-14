@@ -23,7 +23,7 @@ class Int: public Base {
         val = *(int *)buffer;
     }
     void write_to_buffer(char *buffer, std::size_t size) override {
-        strncpy(buffer, (char*)&val, size);
+        memcpy(buffer, (char*)&val, size);
     }
 private:
     int val;

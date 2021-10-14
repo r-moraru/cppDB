@@ -11,20 +11,29 @@ int main() {
         cin >> command;
 
         if (command == "create") {
-            create_table(table_name, cin);
+            if (!create_table(table_name, cin))
+                continue;
             Table table(table_name);
             table.add_root_node();
+            table.print();
             continue;
         }
 
         Table table(table_name);
 
+        cout << "===========TABLE PRINT=============" << endl;
         table.print();
+        cout << "===========TABLE PRINT=============" << endl;
+        cout << endl;
 
         if (command == "select")        table.select_rows(cout, cin);
         else if (command == "insert")   table.insert_row(cin);
         else if (command == "update")   table.update_rows(cin);
         else if (command == "delete")   table.delete_rows(cin);
         else                            cout << "Unrecognized command\n";
+
+        cout << "===========TABLE   DFS=============" << endl;
+        table.dfs();
+        cout << "===========TABLE   DFS=============" << endl;
     }
 }

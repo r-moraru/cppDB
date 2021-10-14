@@ -13,8 +13,8 @@ class Value;
 class Base {
     friend bool operator==(const Value&, const Value&);
     friend bool operator<(const Value& val1, const Value& val2);
-    friend std::istream& operator>>(std::istream&, Value&);
-    friend std::ostream& operator<<(std::ostream&, Value&);
+    friend std::istream& operator>>(std::istream&, const Value&);
+    friend std::ostream& operator<<(std::ostream&, const Value&);
     friend void read_from_buffer(Value&, char *, std::size_t);
     friend void write_to_buffer(const Value&, char *, std::size_t);
     friend class Float;

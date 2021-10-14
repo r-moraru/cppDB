@@ -36,8 +36,10 @@ void BTreeNode::split_child(Pager& pager, int idx, const Value& k) {
     z.is_leaf = y.is_leaf;
 
     if (y.is_leaf) {
+        std::cout << "Splitting leaf node at pos " << y.pos << std::endl;
         z.next_leaf = y.next_leaf;
         if (z.next_leaf != -1) {
+            std::cout << "Node that was after y will point at z " << z.pos << std::endl;
             BTreeNode nl = pager.read_node(z.next_leaf);
             nl.prev_leaf = z.pos;
             pager.write_node_data(nl);
@@ -45,6 +47,7 @@ void BTreeNode::split_child(Pager& pager, int idx, const Value& k) {
 
         y.next_leaf = z.pos;
         z.prev_leaf = y.pos;
+        std::cout << "previous leaf of z is " << z.prev_leaf << std::endl;
     }
 
     for (int i = pager.t; i < y.n; i++) {
@@ -95,6 +98,7 @@ void BTreeNode::insert_non_full(Pager& pager, const Value& k, const vector<Value
         // TODO: check if k is already in tree
         // throw an exception in this case
 
+
         while (i >= 0 && k < keys[i]) {
             keys[i+1] = keys[i];
             data[i+1] = data[i];
@@ -105,6 +109,12 @@ void BTreeNode::insert_non_full(Pager& pager, const Value& k, const vector<Value
         data[i+1] = d;
 
         n++;
+
+        std::cout << "Inserting row ";
+        for (auto& val : data[i+1]) {
+            std::cout << val << " ";
+        }
+        std::cout << std::endl;
 
         pager.write_node_data(*this);
     }
@@ -130,7 +140,6 @@ void BTreeNode::insert_non_full(Pager& pager, const Value& k, const vector<Value
 
 Value BTreeNode::delete_from_node(Pager& pager, const Value& k) {
     int i = 0;
-
     while (i < n && keys[i] < k) {
         i++;
     }
@@ -140,6 +149,7 @@ Value BTreeNode::delete_from_node(Pager& pager, const Value& k) {
         if (ch.n < pager.t)
             i = fill(pager, i);
 
+        ch = pager.read_node(c[i]);
         Value new_key = ch.delete_from_node(pager, k);
 
         if (i < n && keys[i] == k) {
@@ -150,10 +160,14 @@ Value BTreeNode::delete_from_node(Pager& pager, const Value& k) {
         return new_key;
     }
     else {
-        if (keys[i] != k) {
+        if (!(keys[i] == k)) {
             // TODO: key not found, throw exception
         }
-
+        std::cout << "Keys in node: " << std::endl;
+        for (int j = 0; j < n; j++) {
+            std::cout << keys[j] << " ";
+        }
+        std::cout << std::endl;
         for (int j = i; j < n; j++) {
             keys[j] = keys[j+1];
             data[j] = data[j+1];
@@ -204,7 +218,7 @@ void BTreeNode::merge(Pager& pager, int i) {
         if (y.next_leaf != -1) {
             BTreeNode nl = pager.read_node(y.next_leaf);
             nl.prev_leaf = y.pos;
-            pager.write_node_data(y);
+            pager.write_node_data(nl);
         }
     }
     else {
@@ -217,23 +231,23 @@ void BTreeNode::merge(Pager& pager, int i) {
             y.c[y.n+1] = z.c[j+1];
             y.n++;
         }
+    }
 
-        for (int j = i; j < n; j++) {
-            keys[j] = keys[j+1];
-            c[j+1] = c[j+2];
-        }
+    for (int j = i; j < n; j++) {
+        keys[j] = keys[j+1];
+        c[j+1] = c[j+2];
     }
 
     n--;
 
     pager.remove_node(z.pos);
-
     pager.write_node_data(*this);
     pager.write_node_data(y);
 }
 
 void BTreeNode::add_from_left(Pager& pager, int i) {
-    BTreeNode y = pager.read_node(c[i]), z = pager.read_node(c[i-1]);
+    BTreeNode y = pager.read_node(c[i]),
+              z = pager.read_node(c[i-1]);
 
     if (y.is_leaf) {
         for (int j = y.n; j > 0; j--) {
@@ -330,23 +344,20 @@ void BTreeNode::traverse(Pager& pager) {
 
         if (next_leaf != -1) {
             BTreeNode next_leaf_node = pager.read_node(next_leaf);
-
             next_leaf_node.traverse(pager);
         }
     }
     else {
         BTreeNode ch = pager.read_node(c[0]);
-
         ch.traverse(pager);
     }
 }
 
 void BTreeNode::dfs(Pager& pager, int indentation) {
-    std::cout << std::string(indentation, '\t') << "Log: new node: " << std::endl;
+    std::cout << std::string(indentation, '\t') << "Log: new node with " << n << " keys" << std::endl;
     for (int i = 0; i < n; i++) {
         if (!is_leaf) {
             BTreeNode ch = pager.read_node(c[i]);
-
             ch.dfs(pager, indentation+1);
         }
         std::cout << std::string(indentation, '\t') << "---- " << keys[i] << std::endl;
@@ -354,7 +365,55 @@ void BTreeNode::dfs(Pager& pager, int indentation) {
 
     if (!is_leaf) {
         BTreeNode ch = pager.read_node(c[n]);
-
         ch.dfs(pager, indentation+1);
+    }
+}
+
+std::vector<std::vector<Value>> BTreeNode::select_rows(Pager &pager,
+                                                       const Value &value) {
+    using std::vector;
+    int i = 0;
+    while (i < n && keys[i] < value)
+        i++;
+
+    if (is_leaf) {
+        vector<vector<Value>> ret;
+        if (i < n && value == keys[i])
+            ret.push_back(data[i]);
+
+        // TODO: otherwise, throw an exception
+        return ret;
+    }
+    else {
+        BTreeNode ch = pager.read_node(c[i]);
+        return ch.select_rows(pager, value);
+    }
+}
+
+std::vector<std::vector<Value>> BTreeNode::select_rows(Pager &pager, int key_pos,
+                                                       const Value &value) {
+    using std::vector;
+
+    if (is_leaf) {
+        std::cout << "Prev leaf: " << prev_leaf << std::endl;
+        std::cout << "Curr leaf: " << pos << std::endl;
+        std::cout << "Next leaf: " << next_leaf << std::endl;
+        vector<vector<Value>> ret;
+        for (int i = 0; i < n; i++) {
+            if (data[i][key_pos] == value)
+                ret.push_back(data[i]);
+        }
+
+        if (next_leaf != -1) {
+            BTreeNode next = pager.read_node(next_leaf);
+            vector<vector<Value>> added_rows = next.select_rows(pager,
+                                                                key_pos, value);
+            ret.insert(ret.end(), added_rows.begin(), added_rows.end());
+        }
+        return ret;
+    }
+    else {
+        BTreeNode ch = pager.read_node(c[0]);
+        return ch.select_rows(pager, key_pos, value);
     }
 }

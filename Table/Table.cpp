@@ -61,13 +61,13 @@ void generate_file_header(char *page_buffer, std::istream& repl) {
     memcpy(page_buffer, &pos, sizeof(pos));
 }
 
-void create_table(const std::string& table_name, std::istream& repl) {
+bool create_table(const std::string& table_name, std::istream& repl) {
     // initialize table
     using std::string;
 
     std::fstream file;
     if (!open_file(file, table_name+".tab"))
-        return;
+        return false;
 
     char page_buffer[page_size] = {0};
 
@@ -106,6 +106,8 @@ void create_table(const std::string& table_name, std::istream& repl) {
 
     file.write(page_buffer, page_size);
     file.close();
+
+    return true;
 }
 
 void Table::add_root_node() {
@@ -139,7 +141,6 @@ Table::Table(const std::string& table_name): pager(table_name+".tab")  {
         pager.column_sizes.push_back(column_size);
         pager.row_size += column_size;
     }
-
     if (pager.has_primary_key) {
         pager.set_t();
         pager.init_btree();
@@ -152,9 +153,11 @@ void Table::print() {
     cout << "Table " << n << endl;
 
     if (pager.has_primary_key) {
+        cout << "Number of key-value pairs per page: " << pager.t << endl;
         cout << "Primary key position: " << pager.primary_key_pos << endl;
         cout << "Position of btree root page: " << pager.root_pos << endl;
         cout << "Position of first empty page: " << pager.num_valid_pages << endl;
+        cout << "Total number of pages " << pager.num_pages << endl;
     }
 
     cout << "row size: " << pager.row_size << endl;
@@ -194,6 +197,8 @@ std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
     Value val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
     is >> val;
 
+    // TODO: update so as to only print selected columns from rows
+    // TODO: update so that selected rows are returned to this function page by page
     vector<vector<Value>> selected_rows = pager.select_rows(column_pos, val);
 
     os << "Table " << n << "\n";
@@ -208,6 +213,7 @@ std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
 }
 
 std::istream& Table::update_rows(std::istream& is) {
+    // TODO: separate WHERE condition from updated column selection
     std::string column_name;
     is >> column_name;
 

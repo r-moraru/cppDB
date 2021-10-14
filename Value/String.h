@@ -27,7 +27,7 @@ class String: public Base {
         val = temp;
     }
     void write_to_buffer(char *buffer, std::size_t size) override {
-        strncpy(buffer, val.c_str(), size);
+        memcpy(buffer, val.c_str(), std::min(size, val.size()+1));
     }
 private:
     std::string val;

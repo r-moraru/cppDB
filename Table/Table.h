@@ -19,6 +19,7 @@ public:
     explicit Table(const std::string&);  // create table object from existing table file
 
     void print();
+    void dfs() { pager.dfs(); }
     void add_root_node();
     std::istream& insert_row(std::istream&);
     std::istream& update_rows(std::istream&);
@@ -31,7 +32,7 @@ private:
     std::string n;
 };
 
-void create_table(const std::string&, std::istream& repl);
+bool create_table(const std::string&, std::istream& repl);
 void delete_table(const std::string& table_name);
 
 #endif //CPPDB_TABLE_H

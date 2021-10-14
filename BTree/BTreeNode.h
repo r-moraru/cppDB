@@ -37,7 +37,9 @@ private:
     void dfs(Pager&, int);
 
     std::vector<Value> get_data(Pager&, const Value&);
-    // BTreeNode find_row(Pager&, const Value&, int column = -1);
+
+    std::vector<std::vector<Value>> select_rows(Pager&, const Value&);
+    std::vector<std::vector<Value>> select_rows(Pager&, int, const Value&);
 
     void split_child(Pager&, int, const Value&);
     void insert_non_full(Pager&, const Value&, const std::vector<Value>&);

@@ -16,14 +16,20 @@ class BTree {
 private:
     BTreeNode root;
 private:
-    std::vector<Value> get_data(Pager&, const Value&);
+    void dfs(Pager& pager) { root.dfs(pager, 0); };
     void insert(Pager&, const Value&, const std::vector<Value>&);
-    void remove(Pager&, const Value&);
-    void traverse(Pager&);
 
+    void remove(Pager&, const Value&);
+    void remove(Pager&, int, const Value&);
+
+    std::vector<std::vector<Value>> select_rows(Pager&, const Value&);
+    std::vector<std::vector<Value>> select_rows(Pager&, int, const Value&);
+
+    void update_rows(Pager&, const Value&, int, const Value&);
+    void update_rows(Pager&, int, const Value&, int, const Value&);
 public:
     BTree() : root(0) { }
-    BTree(Pager&);
+    // BTree(Pager&);
 };
 
 

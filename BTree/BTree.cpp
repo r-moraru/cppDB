@@ -5,9 +5,15 @@
 #include "BTree.h"
 #include "../Pager/Pager.h"
 
+#include <iostream>
+
 void BTree::insert(Pager& pager, const Value& key, const std::vector<Value>& data) {
     if (root.n == 2*pager.t-1) {
+        std::cout << "Root is full" << std::endl;
         BTreeNode s = pager.insert_new_node();
+        pager.set_btree_root(s.pos);
+
+        std::cout << "Added s, new root, it currently has position " << s.pos << std::endl;
 
         s.is_leaf = false;
         s.c[0] = root.pos;
@@ -17,6 +23,15 @@ void BTree::insert(Pager& pager, const Value& key, const std::vector<Value>& dat
     }
 
     root.insert_non_full(pager, key, data);
+}
+
+std::vector<std::vector<Value>> BTree::select_rows(Pager &pager, const Value &key) {
+    return root.select_rows(pager, key);
+}
+
+std::vector<std::vector<Value>> BTree::select_rows(Pager &pager, int key_pos,
+                                                   const Value &key) {
+    return root.select_rows(pager, key_pos, key);
 }
 
 void BTree::remove(Pager& pager, const Value& k) {
@@ -31,12 +46,32 @@ void BTree::remove(Pager& pager, const Value& k) {
     }
 }
 
-void BTree::traverse(Pager& pager) {
-    root.traverse(pager);
+void BTree::remove(Pager& pager, int key_pos, const Value& k) {
+    std::vector<std::vector<Value>> selected_rows = select_rows(pager, key_pos, k);
+
+    for (auto& row : selected_rows)
+        remove(pager, row[pager.primary_key_pos]);
 }
 
-std::vector<Value> BTree::get_data(Pager &pager, const Value &val) {
-    return root.get_data(pager, val);
+void BTree::update_rows(Pager& pager, const Value &key,
+                        int updated_pos, const Value &new_val) {
+    std::vector<std::vector<Value>> selected_rows = select_rows(pager, key);
+    for (auto& row : selected_rows) {
+        remove(pager, row[pager.primary_key_pos]);
+        row[updated_pos] = new_val;
+        insert(pager, row[pager.primary_key_pos], row);
+    }
 }
 
-BTree::BTree(Pager &pager) : root(pager.read_node(pager.root_pos)) { }
+void BTree::update_rows(Pager &pager, int key_pos,
+                        const Value &key,
+                        int updated_pos, const Value &new_val) {
+    std::vector<std::vector<Value>> selected_rows = select_rows(pager, key_pos, key);
+    for (auto& row : selected_rows) {
+        remove(pager, row[pager.primary_key_pos]);
+        row[updated_pos] = new_val;
+        insert(pager, row[pager.primary_key_pos], row);
+    }
+}
+
+// BTree::BTree(Pager &pager) : root(pager.read_node(pager.root_pos)) { }
