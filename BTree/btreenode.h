@@ -6,8 +6,7 @@
 #define CPPDB_BTREENODE_H
 
 #include <vector>
-#include "value.h"
-// #include "../Pager/Pager.h"
+#include "../Value/value.h"
 
 class Pager;
 

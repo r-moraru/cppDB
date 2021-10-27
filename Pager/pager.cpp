@@ -25,7 +25,7 @@ Pager::Pager(const string& file_name): file_name(file_name),
                       std::ios::binary |
                       std::ios::in);
 
-    page_pos = file.tellg();
+    page_pos = 0;
 
     file.read(page_data, page_size);
 
@@ -125,14 +125,21 @@ bool Pager::read_next_page() {
     return false;
 }
 
-void Pager::read_page_at_pos(int pos) {
+bool Pager::read_page_at_pos(int pos) {
     std::fstream file(file_name,
                       std::ios::binary |
                       std::ios::in);
 
+    std::clog << "Reading page at pos " << page_pos << std::endl;
+
     file.seekg(pos);
 
+    if (pos >= num_valid_pages*page_size)
+        return false;
+
     file.read(page_data, page_size);
+
+    return true;
 }
 
 bool insert_row_in_page(char* page_data, const char* row_data, std::size_t row_size) {
@@ -154,7 +161,7 @@ void write_page(const string& file_name,
                       std::ios::out |
                       std::ios::in);
 
-//    std::cout << "Writing page at pos " << page_pos << std::endl;
+    std::clog << "Writing page at pos " << page_pos << std::endl;
     file.seekg(page_pos);
 
     file.write(page_data, page_size);
@@ -231,9 +238,7 @@ vector<vector<Value>> Pager::select_rows(int column_position, const Value& val) 
     vector<vector<Value>> selected_rows;
 
     if (has_primary_key) {
-//        std::cout << "Selecting keys from table with primary key" << std::endl;
         if (column_position == primary_key_pos) {
-//            std::cout << "Searched column is primary key column" << std::endl;
             selected_rows = btree.select_rows(*this, val);
         }
         else
@@ -318,7 +323,8 @@ void Pager::delete_rows(int column_position, const Value& val) {
     }
 }
 
-void Pager::update_rows_from_page(int pos, const Value& old_val, const Value& new_val) {
+void Pager::update_rows_from_page(int pos, const Value& old_val, int updated_pos,
+                                  const Value& new_val) {
     bool updated_rows = false;
 
     vector<vector<Value>> page_rows = get_page_rows();
@@ -328,7 +334,7 @@ void Pager::update_rows_from_page(int pos, const Value& old_val, const Value& ne
             updated_rows = true;
 
             std::size_t pos_in_row = 0;
-            for (int j = 0; j < pos; j++) pos_in_row += column_sizes[j];
+            for (int j = 0; j < updated_pos; j++) pos_in_row += column_sizes[j];
 
             std::size_t pos_in_page = sizeof(int) + i*row_size + pos_in_row;
             write_to_buffer(new_val, page_data+pos_in_page, column_sizes[pos]);
@@ -339,10 +345,8 @@ void Pager::update_rows_from_page(int pos, const Value& old_val, const Value& ne
         write_page(file_name, page_data, page_pos);
 }
 
-void Pager::update_rows(int column_position, const Value& old_value, const Value& new_value) {
-    // TODO: update such that updated_pos can be different from column_position
-    int updated_pos = column_position;
-
+void Pager::update_rows(int column_position, const Value& old_value,
+                        int updated_pos, const Value& new_value) {
     if (has_primary_key) {
         if (column_position == primary_key_pos)
             btree.update_rows(*this, old_value, updated_pos, new_value);
@@ -354,7 +358,7 @@ void Pager::update_rows(int column_position, const Value& old_value, const Value
     }
 
     while (read_next_page()) {
-        update_rows_from_page(column_position, old_value, new_value);
+        update_rows_from_page(column_position, old_value, updated_pos, new_value);
     }
 }
 
@@ -383,7 +387,8 @@ BTreeNode Pager::read_node(int node_pos) {
     BTreeNode node(t);
     node.pos = node_pos;
 
-    read_page_at_pos(node_pos*page_size);
+    if (!read_page_at_pos(node_pos*page_size))
+        return node;
 
     char *iter = page_data;
 
@@ -470,7 +475,6 @@ void Pager::write_node_data(const BTreeNode &node) {
                 write_to_buffer(node.data[i][j], iter, column_sizes[j]);
                 iter += column_sizes[j];
             }
-            std::cout << "Value " << i << " in node is " << node.data[i][column_names.size()-1] << std::endl;
         }
     }
     else {
@@ -484,7 +488,6 @@ void Pager::write_node_data(const BTreeNode &node) {
 }
 
 void Pager::remove_node(int node_pos) {
-//    std::cout << "Removing node" << node_pos << " from tree\n";
     num_valid_pages--;
 
     read_page_at_pos(num_valid_pages*page_size);
@@ -499,7 +502,6 @@ void Pager::remove_node(int node_pos) {
     moved.pos = node_pos;
 
     if (moved.parent_pos != -1) {
-//        std::cout << "Altering parent at pos " << moved.parent_pos << std::endl;
         BTreeNode parent = read_node(moved.parent_pos);
         for (int i = 0; i <= parent.n; i++)
             if (parent.c[i] == num_valid_pages) {
@@ -511,20 +513,17 @@ void Pager::remove_node(int node_pos) {
 
     if (!moved.is_leaf)
         for (int i = 0; i <= moved.n; i++) {
-//            std::cout << "Altering child " << i << std::endl;
             BTreeNode child = read_node(moved.c[i]);
             child.parent_pos = node_pos;
             write_node_data(child);
         }
 
     if (moved.next_leaf != -1) {
-//        std::cout << "Altering next leaf " << std::endl;
         BTreeNode nl = read_node(moved.next_leaf);
         nl.prev_leaf = node_pos;
         write_node_data(nl);
     }
     if (moved.prev_leaf != -1) {
-//        std::cout << "Altering previous leaf " << std::endl;
         BTreeNode pl = read_node(moved.prev_leaf);
         pl.next_leaf = node_pos;
         write_node_data(pl);
@@ -535,7 +534,6 @@ void Pager::remove_node(int node_pos) {
 }
 
 void Pager::set_btree_root(int node_pos) {
-//    std::cout << "Resetting root position" << std::endl;
     root_pos = node_pos;
     write_header_data();
 }

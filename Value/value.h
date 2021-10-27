@@ -9,7 +9,7 @@
 #include "string_val.h"
 #include "float.h"
 #include "int.h"
-#include "ptr.h"
+#include "../Ptr/ptr.h"
 
 class Value {
     friend std::istream& operator>>(std::istream&, const Value&);

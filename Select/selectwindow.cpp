@@ -1,7 +1,7 @@
 #include "selectwindow.h"
 #include "ui_selectwindow.h"
 
-#include "mainwindow.h"
+#include "../Main/mainwindow.h"
 
 SelectWindow::SelectWindow(QWidget *parent) :
     QDialog(parent),

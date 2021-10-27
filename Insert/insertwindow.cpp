@@ -1,7 +1,7 @@
 #include "insertwindow.h"
 #include "ui_insertwindow.h"
 
-#include "mainwindow.h"
+#include "../Main/mainwindow.h"
 
 InsertWindow::InsertWindow(QWidget *parent) :
     QDialog(parent),

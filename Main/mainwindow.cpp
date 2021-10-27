@@ -1,13 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "insertwindow.h"
-#include "selectwindow.h"
-#include "updatewindow.h"
-#include "deletewindow.h"
-#include "newdbwindow.h"
-#include "newtablewindow.h"
+#include "../Insert/insertwindow.h"
+#include "../Select/selectwindow.h"
+#include "../Update/updatewindow.h"
+#include "../Delete/deletewindow.h"
+#include "../NewDB/newdbwindow.h"
+#include "../NewTable/newtablewindow.h"
 
-#include "table.h"
+#include "../Table/table.h"
 
 #include <QLabel>
 #include <QMessageBox>
@@ -136,7 +136,8 @@ void MainWindow::mw_create_table(QVector<QString>& column_names,
 {
     std::stringstream communication_stream;
     communication_stream << (pk_pos != -1 ? 1 : 0) << " ";
-    communication_stream << pk_pos;
+    if (pk_pos != -1)
+        communication_stream << pk_pos << " ";
     for (int i = 0; i < column_names.size(); i++) {
         communication_stream << column_names[i].toStdString() << " ";
         communication_stream << column_types[i].toStdString();
@@ -152,12 +153,10 @@ void MainWindow::mw_create_table(QVector<QString>& column_names,
     create_table((selectedDB + "/" + table_name).toStdString(),
                  communication_stream);
 
+    selectedTable = table_name + ".tab";
     QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
                                                    selectedTable;
-    QMessageBox ms;
-        ms.setText(path);
-        ms.exec();
-
+    if (pk_pos == -1) return;
     std::string table_path = path.toStdString();
     Table table(table_path);
     table.add_root_node();
@@ -259,6 +258,30 @@ void MainWindow::on_viewTableDataButton_clicked()
 }
 
 
+bool checkValue(QString value, QString column_type) {
+    bool valid = true;
+    std::stringstream test_stream(value.toStdString());
+
+    if (column_type == "i") {
+        int val;
+        if (!(test_stream >> val) || !(test_stream.eof()))
+            valid = false;
+    }
+    else if (column_type == "f") {
+        float val;
+        if (!(test_stream >> val) || !(test_stream.eof()))
+            valid = false;
+    }
+    else if (column_type == "c") {
+        std::string val;
+        if (!(test_stream >> val) || !(test_stream.eof()))
+            valid = false;
+    }
+
+    return valid;
+}
+
+
 void MainWindow::insertRow(QString new_string) {
     std::stringstream ss(new_string.toStdString());
 
@@ -274,41 +297,14 @@ void MainWindow::insertRow(QString new_string) {
     for (int i = 0; i < column_types.size(); i++) {
         std::string word;
         ss >> word;
-        std::stringstream word_ss(word);
 
-        if (column_types[i] == "i") {
-            int v;
-            if (!(word_ss >> v)) {
-                is_valid = false;
-                QMessageBox mb;
-                mb.setWindowTitle("Error");
-                mb.setText("Wrong value at pos " + QString::number(i));
-                mb.exec();
-                break;
-            }
-            else if (!word_ss.eof()) {
-                is_valid = false;
-                QMessageBox mb;
-                mb.setWindowTitle("Error");
-                mb.setText("Wrong value at pos " + QString::number(i));
-                mb.exec();
-                break;
-            }
-        }
-        else if (column_types[i] == "f") {
-            float val;
-            if (!(word_ss >> val)) {
-                is_valid = false;
-                QMessageBox mb;
-                mb.setWindowTitle("Error");
-                mb.setText("Wrong value at pos " + QString::number(i));
-                mb.exec();
-                break;
-            }
-        }
-        else if (column_types[i] == "c") {
-            std::string val;
-            word_ss >> val;
+        if (!checkValue(QString::fromStdString(word), column_types[i])) {
+            is_valid = false;
+            QMessageBox mb;
+            mb.setWindowTitle("Error");
+            mb.setText("Wrong value at pos " + QString::number(i));
+            mb.exec();
+            break;
         }
     }
 
@@ -330,61 +326,58 @@ void MainWindow::insertRow(QString new_string) {
 }
 
 
+int getColumnPos(QVector<QString> column_names, QString column_name) {
+    int i;
+    for (i = 0; i < column_names.size(); i++) {
+        if (column_names[i] == column_name) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+
+bool checkColumnValuePair(QString column_name, QString value,
+                          QVector<QString> column_names,
+                          QVector<QString> column_types) {
+    int i = getColumnPos(column_names, column_name);
+
+    if (i == -1) {
+        QMessageBox mb;
+        mb.setWindowTitle("Error");
+        mb.setText("Requested column does not exist in table");
+        mb.exec();
+
+        return false;
+    }
+
+    if (!checkValue(value, column_types[i])) {
+        QMessageBox mb;
+        mb.setWindowTitle("Error");
+        mb.setText("Invalid value");
+        mb.exec();
+
+        return false;
+    }
+
+    return true;
+}
+
+
 void MainWindow::selectRows(QString column_name, QString value) {
     QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
                                                    selectedTable;
     std::string table_path = path.toStdString();
     Table table(table_path);
 
-    bool valid = false;
-
     QVector<QString> column_names = table.get_column_names();
     QVector<QString> column_types = table.get_column_types();
 
-    int i;
-    for (i = 0; i < column_names.size(); i++) {
-        if (column_names[i] == column_name) {
-            valid = true;
-            break;
-        }
-    }
+    bool valid = checkColumnValuePair(column_name, value, column_names, column_types);
 
     if (!valid) {
-        QMessageBox mb;
-        mb.setWindowTitle("Error");
-        mb.setText("Requested column does not exist in table");
-        mb.exec();
-
         emit retry();
-
-        return;
-    }
-
-    std::stringstream test_stream(value.toStdString());
-    if (column_types[i] == "i") {
-        int val;
-        if (!(test_stream >> val) || !(test_stream.eof()))
-            valid = false;
-    }
-    else if (column_types[i] == "f") {
-        float val;
-        if (!(test_stream >> val) || !(test_stream.eof()))
-            valid = false;
-    }
-    else if (column_types[i] == "c") {
-        std::string val;
-        if (!(test_stream >> val) || !(test_stream.eof()))
-            valid = false;
-    }
-
-    if (!valid) {
-        QMessageBox mb;
-        mb.setWindowTitle("Error");
-        mb.setText("Invalid value");
-        mb.exec();
-
-        emit retry();
-
         return;
     }
 
@@ -411,10 +404,6 @@ void MainWindow::selectRows(QString column_name, QString value) {
     std::string str;
 
     while (answer >> str) {
-        QMessageBox ms;
-        ms.setText("Am ajus aici.");
-        ms.exec();
-
         if (col_num == column_names.size()) {
             col_num = 0;
             row_num++;
@@ -429,17 +418,65 @@ void MainWindow::selectRows(QString column_name, QString value) {
                                                    cellWidget(row_num, col_num));
 
         cellLabel->setText(result);
+        cellLabel->setAlignment(Qt::AlignHCenter);
 
         col_num++;
     }
 }
 
 void MainWindow::deleteRow(QString column_name, QString value) {
+    QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
+                                                   selectedTable;
+    std::string table_path = path.toStdString();
+    Table table(table_path);
 
+    QVector<QString> column_names = table.get_column_names();
+    QVector<QString> column_types = table.get_column_types();
+
+    bool valid = checkColumnValuePair(column_name, value, column_names, column_types);
+
+    if (!valid) {
+        emit retry();
+        return;
+    }
+
+    std::stringstream input;
+
+    input << column_name.toStdString() << " " << value.toStdString();
+
+    table.delete_rows(input);
 }
 
 
 void MainWindow::updateRow(QString searched_name, QString searched_value,
                            QString updated_name, QString new_value) {
+    QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
+                                                   selectedTable;
+    std::string table_path = path.toStdString();
+    Table table(table_path);
 
+    QVector<QString> column_names = table.get_column_names();
+    QVector<QString> column_types = table.get_column_types();
+
+    bool valid = checkColumnValuePair(searched_name, searched_value,
+                                      column_names, column_types);
+
+    valid &= checkColumnValuePair(updated_name, new_value,
+                                  column_names, column_types);
+
+    if (!valid) {
+        emit retry();
+        return;
+    }
+
+    std::stringstream input;
+
+    input << searched_name.toStdString() <<
+             " " << searched_value.toStdString() <<
+             " ";
+
+    input << updated_name.toStdString() <<
+             " " << new_value.toStdString();
+
+    table.update_rows(input);
 }

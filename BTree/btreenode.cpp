@@ -2,13 +2,14 @@
 // Created by radua on 10/8/2021.
 //
 
+#include <QMessageBox>
+
 #include <iostream>
 #include <vector>
 #include "btreenode.h"
-#include "pager.h"
+#include "../Pager/pager.h"
 
 using std::vector;
-using std::cout, std::cin;
 
 vector<Value> BTreeNode::get_data(Pager& pager, const Value& k) {
     int i = 0;
@@ -36,10 +37,8 @@ void BTreeNode::split_child(Pager& pager, int idx, const Value& k) {
     z.is_leaf = y.is_leaf;
 
     if (y.is_leaf) {
-        std::cout << "Splitting leaf node at pos " << y.pos << std::endl;
         z.next_leaf = y.next_leaf;
         if (z.next_leaf != -1) {
-            std::cout << "Node that was after y will point at z " << z.pos << std::endl;
             BTreeNode nl = pager.read_node(z.next_leaf);
             nl.prev_leaf = z.pos;
             pager.write_node_data(nl);
@@ -47,7 +46,6 @@ void BTreeNode::split_child(Pager& pager, int idx, const Value& k) {
 
         y.next_leaf = z.pos;
         z.prev_leaf = y.pos;
-        std::cout << "previous leaf of z is " << z.prev_leaf << std::endl;
     }
 
     for (int i = pager.t; i < y.n; i++) {
@@ -99,22 +97,24 @@ void BTreeNode::insert_non_full(Pager& pager, const Value& k, const vector<Value
         // throw an exception in this case
 
 
-        while (i >= 0 && k < keys[i]) {
+        while (i >= 0 && (k < keys[i] || k == keys[i])) {
             keys[i+1] = keys[i];
             data[i+1] = data[i];
             i--;
+        }
+
+        if (i+1 < n && keys[i+1] == k) {
+            QMessageBox ms;
+            ms.setText("Duplicate primary key detected.");
+            ms.exec();
+
+            return;
         }
 
         keys[i+1] = k;
         data[i+1] = d;
 
         n++;
-
-        std::cout << "Inserting row ";
-        for (auto& val : data[i+1]) {
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
 
         pager.write_node_data(*this);
     }
@@ -162,12 +162,9 @@ Value BTreeNode::delete_from_node(Pager& pager, const Value& k) {
     else {
         if (!(keys[i] == k)) {
             // TODO: key not found, throw exception
+            return Value();
         }
-        std::cout << "Keys in node: " << std::endl;
-        for (int j = 0; j < n; j++) {
-            std::cout << keys[j] << " ";
-        }
-        std::cout << std::endl;
+
         for (int j = i; j < n; j++) {
             keys[j] = keys[j+1];
             data[j] = data[j+1];
@@ -334,14 +331,6 @@ void BTreeNode::add_from_right(Pager& pager, int i) {
 
 void BTreeNode::traverse(Pager& pager) {
     if (is_leaf) {
-        for (int i = 0; i < n; i++) {
-            std::cout << keys[i] << ": ";
-            for (auto &val : data[i]) {
-                std::cout << val << " ";
-            }
-            std::cout << std::endl;
-        }
-
         if (next_leaf != -1) {
             BTreeNode next_leaf_node = pager.read_node(next_leaf);
             next_leaf_node.traverse(pager);
@@ -395,9 +384,6 @@ std::vector<std::vector<Value>> BTreeNode::select_rows(Pager &pager, int key_pos
     using std::vector;
 
     if (is_leaf) {
-        std::cout << "Prev leaf: " << prev_leaf << std::endl;
-        std::cout << "Curr leaf: " << pos << std::endl;
-        std::cout << "Next leaf: " << next_leaf << std::endl;
         vector<vector<Value>> ret;
         for (int i = 0; i < n; i++) {
             if (data[i][key_pos] == value)

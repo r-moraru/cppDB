@@ -1,8 +1,8 @@
 #include "newtablewindow.h"
 #include "ui_newtablewindow.h"
-#include "table.h"
+#include "../Table/table.h"
 
-#include "mainwindow.h"
+#include "../Main/mainwindow.h"
 #include <QMessageBox>
 #include <sstream>
 
@@ -34,12 +34,21 @@ void NewTableWindow::on_addColumnButton_clicked()
 {
     QString new_column = ui->columnNameLineEdit->text();
     for (auto & column_name : column_names) {
-        // TODO: add dialog box
-        if (column_name == new_column)  return;
+        if (column_name == new_column) {
+            QMessageBox ms;
+            ms.setText("Column with name " + new_column + " already exists");
+            ms.exec();
+            return;
+        }
     }
 
     // TODO: add dialog box
-    if (pk_pos != -1 && ui->isPKCheckBox->isChecked())     return;
+    if (pk_pos != -1 && ui->isPKCheckBox->isChecked()) {
+        QMessageBox ms;
+        ms.setText("Primary key has already been assigned to column " +
+                   QString::number(pk_pos));
+        ms.exec();
+    }
 
     column_names.push_back(new_column);
     if (ui->intRadioButton->isChecked()) {
@@ -56,13 +65,11 @@ void NewTableWindow::on_addColumnButton_clicked()
         column_sizes.push_back(ui->stringSizeLineEdit->text().toInt());
     }
     else {
-        // TODO: add dialog box
+        QMessageBox ms;
+        ms.setText("No data type seleceted");
+        ms.exec();
         return;
     }
-
-    QMessageBox mb;
-    mb.setText("asdf");
-    mb.exec();
 
     if (ui->isPKCheckBox->isChecked())
         pk_pos = column_names.size()-1;
@@ -78,7 +85,6 @@ void NewTableWindow::on_addColumnButton_clicked()
 
 void NewTableWindow::on_doneButton_clicked()
 {
-    // TODO: turn data into a valid stream and send it to table create function
     if (!column_names.empty() && ui->tableNameLineEdit->text() != "") {
         emit readyToCreate(column_names, column_types, column_sizes, pk_pos,
                            ui->tableNameLineEdit->text());

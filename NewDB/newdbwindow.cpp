@@ -1,5 +1,5 @@
 #include "newdbwindow.h"
-#include "mainwindow.h"
+#include "../Main/mainwindow.h"
 #include "ui_newdbwindow.h"
 
 #include <QMessageBox>

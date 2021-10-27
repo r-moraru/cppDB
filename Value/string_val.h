@@ -6,7 +6,7 @@
 #define CPPDB_STRING_H
 
 #include <cstring>
-#include "Base.h"
+#include "base.h"
 
 class String: public Base {
     bool operator==(const Base& b) override {

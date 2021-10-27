@@ -5,12 +5,12 @@
 #ifndef CPPDB_TABLE_H
 #define CPPDB_TABLE_H
 
-#include "db_constants.h"
+#include "../db_constants.h"
 
 #include <QVector>
-#include "value.h"
-#include "ptr.h"
-#include "pager.h"
+#include "../Value/value.h"
+#include "../Ptr/ptr.h"
+#include "../Pager/pager.h"
 #include <string>
 #include <vector>
 

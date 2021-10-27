@@ -8,9 +8,9 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "value.h"
-#include "btree.h"
-#include "db_constants.h"
+#include "../Value/value.h"
+#include "../BTree/btree.h"
+#include "../db_constants.h"
 
 class BTree;
 class BTreeNode;
@@ -30,13 +30,13 @@ private:
     void insert_row(std::istream& repl);
     void delete_rows(int, const Value&);
     void delete_rows_from_page(int, const Value&);
-    void update_rows(int, const Value&, const Value&);
-    void update_rows_from_page(int, const Value&, const Value&);
+    void update_rows(int, const Value&, int, const Value&);
+    void update_rows_from_page(int, const Value&, int, const Value&);
     std::vector<std::vector<Value>> select_rows(int, const Value&);
     std::vector<std::vector<Value>> select_rows_from_page(int, const Value&);
     std::vector<std::vector<Value>> get_page_rows();
 
-    void read_page_at_pos(int pos);
+    bool read_page_at_pos(int pos);
 
     void init_btree();
     void set_btree_root(int node_pos);

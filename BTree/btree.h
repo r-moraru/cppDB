@@ -6,7 +6,6 @@
 #define CPPDB_BTREE_H
 
 #include <string>
-// #include "../Pager/Pager.h"
 #include "btreenode.h"
 
 class Pager;

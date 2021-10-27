@@ -2,18 +2,17 @@
 // Created by radua on 10/8/2021.
 //
 
+#include <QMessageBox>
+
 #include "btree.h"
-#include "pager.h"
+#include "../Pager/pager.h"
 
 #include <iostream>
 
 void BTree::insert(Pager& pager, const Value& key, const std::vector<Value>& data) {
     if (root.n == 2*pager.t-1) {
-        std::cout << "Root is full" << std::endl;
         BTreeNode s = pager.insert_new_node();
         pager.set_btree_root(s.pos);
-
-        std::cout << "Added s, new root, it currently has position " << s.pos << std::endl;
 
         s.is_leaf = false;
         s.c[0] = root.pos;
@@ -55,6 +54,9 @@ void BTree::remove(Pager& pager, int key_pos, const Value& k) {
 
 void BTree::update_rows(Pager& pager, const Value &key,
                         int updated_pos, const Value &new_val) {
+    QMessageBox ms;
+    ms.setText("b tree update with primary search key");
+    ms.exec();
     std::vector<std::vector<Value>> selected_rows = select_rows(pager, key);
     for (auto& row : selected_rows) {
         remove(pager, row[pager.primary_key_pos]);
@@ -66,12 +68,16 @@ void BTree::update_rows(Pager& pager, const Value &key,
 void BTree::update_rows(Pager &pager, int key_pos,
                         const Value &key,
                         int updated_pos, const Value &new_val) {
+    QMessageBox ms;
+    ms.setText("b tree update with non-primary search key");
+    ms.exec();
     std::vector<std::vector<Value>> selected_rows = select_rows(pager, key_pos, key);
     for (auto& row : selected_rows) {
         remove(pager, row[pager.primary_key_pos]);
         row[updated_pos] = new_val;
+        QMessageBox ms;
+        ms.setText("new_value: ");
+        ms.exec();
         insert(pager, row[pager.primary_key_pos], row);
     }
 }
-
-// BTree::BTree(Pager &pager) : root(pager.read_node(pager.root_pos)) { }

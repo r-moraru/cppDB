@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
+    <generated>
+      <config projectName="cppDB" targetName="cppDB" />
+    </generated>
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" ENABLED="true" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="2ff4a0ec-0932-467b-a31e-6581d34ea09f" name="Default Changelist" comment="Implemented">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_constants.h" beforeDir="false" afterPath="$PROJECT_DIR$/db_constants.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mainwindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/mainwindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/newtablewindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/newtablewindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/pager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pager.h" beforeDir="false" afterPath="$PROJECT_DIR$/pager.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/table.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/table.cpp" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedIndex" value="1" />
+  </component>
+  <component name="ProjectId" id="1ymt6VEULQi95TXmwW9jRiWphzR" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.first.check.clang-format" value="false" />
+    <property name="cidr.known.project.marker" value="true" />
+    <property name="cmake.loaded.for.project" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\radua\CLionProjects\cppDB\cmake-build-debug" />
+      <recent name="C:\Users\radua\CLionProjects\cppDB\Value" />
+      <recent name="C:\Users\radua\CLionProjects\cppDB\Ptr" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="cppDB" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="cppDB" TARGET_NAME="cppDB" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="cppDB" RUN_TARGET_NAME="cppDB">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2ff4a0ec-0932-467b-a31e-6581d34ea09f" name="Default Changelist" comment="" />
+      <created>1632868415798</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1632868415798</updated>
+      <workItem from="1632868417445" duration="1603000" />
+      <workItem from="1632913781172" duration="16931000" />
+      <workItem from="1632981071033" duration="49062000" />
+      <workItem from="1633249881299" duration="12539000" />
+      <workItem from="1633357274237" duration="600000" />
+      <workItem from="1633709493747" duration="2458000" />
+      <workItem from="1633794259473" duration="1237000" />
+      <workItem from="1633798978441" duration="1191000" />
+      <workItem from="1633862615739" duration="7676000" />
+      <workItem from="1633945002201" duration="10399000" />
+      <workItem from="1633991175665" duration="131000" />
+      <workItem from="1634030619775" duration="735000" />
+      <workItem from="1634031376434" duration="11289000" />
+      <workItem from="1634114281078" duration="13424000" />
+      <workItem from="1634135247812" duration="21645000" />
+      <workItem from="1634166578077" duration="5233000" />
+      <workItem from="1634196946179" duration="4884000" />
+      <workItem from="1634210497746" duration="6149000" />
+      <workItem from="1634240339030" duration="638000" />
+      <workItem from="1634242012784" duration="1709000" />
+      <workItem from="1634332111348" duration="432000" />
+      <workItem from="1634408412671" duration="1436000" />
+      <workItem from="1634500721936" duration="1188000" />
+      <workItem from="1634643011031" duration="20000" />
+      <workItem from="1635181193696" duration="5845000" />
+      <workItem from="1635253154213" duration="596000" />
+      <workItem from="1635285771436" duration="3371000" />
+      <workItem from="1635292391233" duration="2970000" />
+      <workItem from="1635329418394" duration="799000" />
+      <workItem from="1635345403610" duration="1336000" />
+    </task>
+    <task id="LOCAL-00001" summary="Initial project commit">
+      <created>1632868530351</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1632868530351</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Revert &quot;Initial project commit&quot;&#10;&#10;This reverts commit 9c1779cf">
+      <created>1632868581577</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1632868581577</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Revert &quot;Revert &quot;Initial project commit&quot;&quot;&#10;&#10;This reverts commit 4d46f711">
+      <created>1632868606051</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1632868606051</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Created basic table interface&#10;Added generic handle class">
+      <created>1632923465921</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1632923465921</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Wrote table constructor and function for table creation&#10;Added pager function to return table column data from file">
+      <created>1632989998280</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1632989998280</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Added insert and select functions&#10;Wrote the REPL">
+      <created>1633250986854</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1633250986854</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Added update and delete functions">
+      <created>1633343737780</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1633343737780</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added basic BTree functionality&#10;Added tree node data manipulation functions to the pager">
+      <created>1634139819686</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1634139819686</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Added update&#10;Tested and solved issues with insertion, deletion and selection">
+      <created>1634216345799</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1634216345799</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Added GUI &#10;- Implemented DB creation/selection/deletion functionality &#10;- Implemented Table creation/selection/deletion functionality &#10;- Implemented row selection and insertion &#10;- Added a button that shows table data &#10;- Changed path of table files">
+      <created>1635329586005</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1635329586005</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial project commit" />
+    <MESSAGE value="Revert &quot;Initial project commit&quot;&#10;&#10;This reverts commit 9c1779cf" />
+    <MESSAGE value="Revert &quot;Revert &quot;Initial project commit&quot;&quot;&#10;&#10;This reverts commit 4d46f711" />
+    <MESSAGE value="Created basic table interface&#10;Added generic handle class" />
+    <MESSAGE value="Wrote table constructor and function for table creation&#10;Added pager function to return table column data from file" />
+    <MESSAGE value="Added insert and select functions&#10;Wrote the REPL" />
+    <MESSAGE value="Added update and delete functions" />
+    <MESSAGE value="Added basic BTree functionality&#10;Added tree node data manipulation functions to the pager" />
+    <MESSAGE value="Added update&#10;Tested and solved issues with insertion, deletion and selection" />
+    <MESSAGE value="Added GUI &#10;- Implemented DB creation/selection/deletion functionality &#10;- Implemented Table creation/selection/deletion functionality &#10;- Implemented row selection and insertion &#10;- Added a button that shows table data &#10;- Changed path of table files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added GUI &#10;- Implemented DB creation/selection/deletion functionality &#10;- Implemented Table creation/selection/deletion functionality &#10;- Implemented row selection and insertion &#10;- Added a button that shows table data &#10;- Changed path of table files" />
+  </component>
+</project>

@@ -120,6 +120,7 @@ void Table::add_root_node() {
     root.is_leaf = true;
     root.parent_pos = -1;
     root.next_leaf = -1;
+    root.prev_leaf = -1;
     root.n = 0;
 
     pager.write_node_data(root);
@@ -198,22 +199,33 @@ std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
 
 std::istream& Table::update_rows(std::istream& is) {
     // TODO: separate WHERE condition from updated column selection
-    std::string column_name;
-    is >> column_name;
+    std::string searched_name;
+    is >> searched_name;
 
-    int column_pos = get_column_position(column_name, pager.column_names);
+    int searched_pos = get_column_position(searched_name, pager.column_names);
 
-    if (column_pos == -1) {
+    if (searched_pos == -1) {
         clog << "Could not find requested column\n";
         return is;
     }
 
-    Value old_val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
-    Value new_val(pager.column_types[column_pos], pager.column_sizes[column_pos]);
+    Value src_val(pager.column_types[searched_pos], pager.column_sizes[searched_pos]);
+    is >> src_val;
 
-    is >> old_val >> new_val;
+    std::string updated_name;
+    is >> updated_name;
 
-    pager.update_rows(column_pos, old_val, new_val);
+    int updated_pos = get_column_position(updated_name, pager.column_names);
+
+    if (updated_pos == -1) {
+        clog << "Could not find requested column\n";
+        return is;
+    }
+
+    Value new_val(pager.column_types[updated_pos], pager.column_sizes[updated_pos]);
+    is >> new_val;
+
+    pager.update_rows(searched_pos, src_val, updated_pos, new_val);
 
     return is;
 }
@@ -240,10 +252,6 @@ std::istream& Table::delete_rows(std::istream& is) {
 
 QVector<QString> Table::get_column_names() {
     QVector<QString> ret;
-
-    QMessageBox ms;
-    ms.setText(QString::number(pager.column_names.size()));
-    ms.exec();
 
     for (auto & column_name : pager.column_names)
         ret.push_back(QString::fromStdString(column_name));

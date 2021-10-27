@@ -1,7 +1,7 @@
 #include "deletewindow.h"
 #include "ui_deletewindow.h"
 
-#include "mainwindow.h"
+#include "../Main/mainwindow.h"
 
 DeleteWindow::DeleteWindow(QWidget *parent) :
     QDialog(parent),

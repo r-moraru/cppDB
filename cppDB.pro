@@ -9,49 +9,49 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    btree.cpp \
-    btreenode.cpp \
-    deletewindow.cpp \
-    insertwindow.cpp \
+    BTree/btree.cpp \
+    BTree/btreenode.cpp \
+    Delete/deletewindow.cpp \
+    Insert/insertwindow.cpp \
     main.cpp \
-    mainwindow.cpp \
-    newdbwindow.cpp \
-    newtablewindow.cpp \
-    pager.cpp \
-    ptr.cpp \
-    selectwindow.cpp \
-    table.cpp \
-    updatewindow.cpp \
-    value.cpp
+    Main/mainwindow.cpp \
+    NewDB/newdbwindow.cpp \
+    NewTable/newtablewindow.cpp \
+    Pager/pager.cpp \
+    Ptr/ptr.cpp \
+    Select/selectwindow.cpp \
+    Table/table.cpp \
+    Update/updatewindow.cpp \
+    Value/value.cpp
 
 HEADERS += \
-    base.h \
-    btree.h \
-    btreenode.h \
+    Value/base.h \
+    BTree/btree.h \
+    BTree/btreenode.h \
     db_constants.h \
-    deletewindow.h \
-    float.h \
-    insertwindow.h \
-    int.h \
-    mainwindow.h \
-    newdbwindow.h \
-    newtablewindow.h \
-    pager.h \
-    ptr.h \
-    selectwindow.h \
-    string_val.h \
-    table.h \
-    updatewindow.h \
-    value.h
+    Delete/deletewindow.h \
+    Value/float.h \
+    Insert/insertwindow.h \
+    Value/int.h \
+    Main/mainwindow.h \
+    NewDB/newdbwindow.h \
+    NewTable/newtablewindow.h \
+    Pager/pager.h \
+    Ptr/ptr.h \
+    Select/selectwindow.h \
+    Value/string_val.h \
+    Table/table.h \
+    Update/updatewindow.h \
+    Value/value.h
 
 FORMS += \
-    deletewindow.ui \
-    insertwindow.ui \
-    mainwindow.ui \
-    newdbwindow.ui \
-    newtablewindow.ui \
-    selectwindow.ui \
-    updatewindow.ui
+    Delete/deletewindow.ui \
+    Insert/insertwindow.ui \
+    Main/mainwindow.ui \
+    NewDB/newdbwindow.ui \
+    NewTable/newtablewindow.ui \
+    Select/selectwindow.ui \
+    Update/updatewindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
