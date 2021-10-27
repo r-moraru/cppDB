@@ -7,7 +7,7 @@
 
 #include <string>
 // #include "../Pager/Pager.h"
-#include "BTreeNode.h"
+#include "btreenode.h"
 
 class Pager;
 

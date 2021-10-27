@@ -6,10 +6,10 @@
 #define CPPDB_VALUE_H
 
 #include <string>
-#include "String.h"
-#include "Float.h"
-#include "Int.h"
-#include "../Ptr/Ptr.h"
+#include "string_val.h"
+#include "float.h"
+#include "int.h"
+#include "ptr.h"
 
 class Value {
     friend std::istream& operator>>(std::istream&, const Value&);

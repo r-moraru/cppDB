@@ -2,7 +2,7 @@
 // Created by radua on 9/29/2021.
 //
 
-#include "Value.h"
+#include "value.h"
 
 std::istream& operator>>(std::istream& is, const Value& value) {
     value.value_ptr->read(is);

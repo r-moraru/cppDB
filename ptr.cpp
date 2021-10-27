@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 #include <stdexcept>
-#include "Ptr.h"
+#include "ptr.h"
 
 template <class T>
 Ptr<T>::Ptr(): p(nullptr), refptr(new std::size_t(1)) { }

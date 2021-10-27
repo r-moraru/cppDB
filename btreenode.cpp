@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include <vector>
-#include "BTreeNode.h"
-#include "../Pager/Pager.h"
+#include "btreenode.h"
+#include "pager.h"
 
 using std::vector;
 using std::cout, std::cin;

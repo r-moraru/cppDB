@@ -25,6 +25,6 @@ private:
     T* p;
 };
 
-#include "Ptr.cpp"
+#include "ptr.cpp"
 
 #endif //CPPDB_PTR_H

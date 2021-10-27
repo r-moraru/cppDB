@@ -8,9 +8,9 @@
 #include <vector>
 #include <fstream>
 #include <string>
-#include "../Value/Value.h"
-#include "../BTree/BTree.h"
-#include "../constants.h"
+#include "value.h"
+#include "btree.h"
+#include "db_constants.h"
 
 class BTree;
 class BTreeNode;

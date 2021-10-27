@@ -1,39 +1,11 @@
-#include <iostream>
-#include "Table/Table.h"
+#include "mainwindow.h"
 
-using namespace std;
+#include <QApplication>
 
-int main() {
-    string table_name;
-
-    while (cin >> table_name && table_name != "exit") {
-        string command;
-        cin >> command;
-
-        if (command == "create") {
-            if (!create_table(table_name, cin))
-                continue;
-            Table table(table_name);
-            table.add_root_node();
-            table.print();
-            continue;
-        }
-
-        Table table(table_name);
-
-        cout << "===========TABLE PRINT=============" << endl;
-        table.print();
-        cout << "===========TABLE PRINT=============" << endl;
-        cout << endl;
-
-        if (command == "select")        table.select_rows(cout, cin);
-        else if (command == "insert")   table.insert_row(cin);
-        else if (command == "update")   table.update_rows(cin);
-        else if (command == "delete")   table.delete_rows(cin);
-        else                            cout << "Unrecognized command\n";
-
-        cout << "===========TABLE   DFS=============" << endl;
-        table.dfs();
-        cout << "===========TABLE   DFS=============" << endl;
-    }
+int main(int argc, char *argv[])
+{
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
 }

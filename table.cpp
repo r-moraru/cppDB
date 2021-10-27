@@ -2,18 +2,23 @@
 // Created by radua on 9/29/2021.
 //
 
-#include <filesystem>
+#include <QMessageBox>
+
+#include <QFile>
+#include <QDir>
 #include <fstream>
 #include <iostream>
-#include "Table.h"
+#include <sstream>
+#include "table.h"
 
 bool open_file(std::fstream& file, const std::string& file_name) {
-    if (std::filesystem::exists(file_name)) {
+    QString path = QDir::currentPath() + "/DBs/" + QString::fromStdString(file_name);
+    if (QFile(path).exists()) {
         std::clog << "Table already exists\n";
         return false;
     }
 
-    file.open(file_name,
+    file.open(path.toStdString(),
               std::ios::binary | std::ios::out);
 
     return true;
@@ -122,10 +127,10 @@ void Table::add_root_node() {
 
 void delete_table(const std::string& table_name) {
     std::string file_name = table_name+".tab";
-    std::filesystem::remove(file_name);
+    QFile(QString::fromStdString(file_name)).remove();
 }
 
-Table::Table(const std::string& table_name): pager(table_name+".tab")  {
+Table::Table(const std::string& table_name): pager(table_name)  {
     n = table_name;
 
     std::vector<std::string> column_data = pager.get_column_data();
@@ -148,26 +153,6 @@ Table::Table(const std::string& table_name): pager(table_name+".tab")  {
 }
 
 using namespace std;
-
-void Table::print() {
-    cout << "Table " << n << endl;
-
-    if (pager.has_primary_key) {
-        cout << "Number of key-value pairs per page: " << pager.t << endl;
-        cout << "Primary key position: " << pager.primary_key_pos << endl;
-        cout << "Position of btree root page: " << pager.root_pos << endl;
-        cout << "Position of first empty page: " << pager.num_valid_pages << endl;
-        cout << "Total number of pages " << pager.num_pages << endl;
-    }
-
-    cout << "row size: " << pager.row_size << endl;
-
-    cout << "columns:\n";
-
-    for (int i = 0; i < pager.column_names.size(); i++) {
-        cout << pager.column_names[i] << "\t" << pager.column_types[i] << "\t" << pager.column_sizes[i] << endl;
-    }
-}
 
 std::istream& Table::insert_row(std::istream& repl) {
     pager.insert_row(repl);
@@ -201,7 +186,6 @@ std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
     // TODO: update so that selected rows are returned to this function page by page
     vector<vector<Value>> selected_rows = pager.select_rows(column_pos, val);
 
-    os << "Table " << n << "\n";
     for (auto& row : selected_rows) {
         for (auto& v : row) {
             os << v << " ";
@@ -251,4 +235,46 @@ std::istream& Table::delete_rows(std::istream& is) {
     pager.delete_rows(column_pos, val);
 
     return is;
+}
+
+
+QVector<QString> Table::get_column_names() {
+    QVector<QString> ret;
+
+    QMessageBox ms;
+    ms.setText(QString::number(pager.column_names.size()));
+    ms.exec();
+
+    for (auto & column_name : pager.column_names)
+        ret.push_back(QString::fromStdString(column_name));
+
+    return ret;
+}
+
+
+QVector<QString> Table::get_column_types() {
+    QVector<QString> ret;
+    for (auto & column_type : pager.column_types)
+        ret.push_back(QString::fromStdString(column_type));
+
+    return ret;
+}
+
+
+QVector<QString> Table::get_column_sizes() {
+    QVector<QString> ret;
+    for (auto & column_sizes : pager.column_sizes)
+        ret.push_back(QString::number(column_sizes));
+
+    return ret;
+}
+
+
+int Table::get_primary_key_pos() {
+    return pager.primary_key_pos;
+}
+
+
+int Table::get_column_count() {
+    return pager.column_names.size();
 }

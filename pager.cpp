@@ -2,13 +2,18 @@
 // Created by radua on 9/29/2021.
 //
 
-#include <filesystem>
+#include <QDir>
+#include <QFile>
+
 #include <algorithm>
 #include <cstring>
 #include <string>
 #include <vector>
 #include <iostream>
-#include "Pager.h"
+#include "pager.h"
+
+#include <QMessageBox>
+#include <QString>
 
 using std::vector;
 using std::string;
@@ -36,7 +41,7 @@ Pager::Pager(const string& file_name): file_name(file_name),
 
     num_valid_pages = *(int *)iter;
 
-    num_pages = std::filesystem::file_size(file_name) / page_size;
+    num_pages = QFile(QString::fromStdString(file_name)).size() / page_size;
 
     file.close();
 }

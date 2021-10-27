@@ -2,8 +2,8 @@
 // Created by radua on 10/8/2021.
 //
 
-#include "BTree.h"
-#include "../Pager/Pager.h"
+#include "btree.h"
+#include "pager.h"
 
 #include <iostream>
 

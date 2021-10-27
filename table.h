@@ -5,12 +5,12 @@
 #ifndef CPPDB_TABLE_H
 #define CPPDB_TABLE_H
 
-#include "../constants.h"
+#include "db_constants.h"
 
-#include "../Value/Value.h"
-#include "../Ptr/Ptr.h"
-#include "../Row/Row.h"
-#include "../Pager/Pager.h"
+#include <QVector>
+#include "value.h"
+#include "ptr.h"
+#include "pager.h"
 #include <string>
 #include <vector>
 
@@ -18,7 +18,13 @@ class Table {
 public:
     explicit Table(const std::string&);  // create table object from existing table file
 
-    void print();
+    int get_primary_key_pos();
+    int get_column_count();
+
+    QVector<QString> get_column_names();
+    QVector<QString> get_column_types();
+    QVector<QString> get_column_sizes();
+
     void dfs() { pager.dfs(); }
     void add_root_node();
     std::istream& insert_row(std::istream&);
