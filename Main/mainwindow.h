@@ -31,7 +31,7 @@ signals:
     void retry();
 
 public slots:
-    void mw_create_table(QVector<QString>&, QVector<QString>&, QVector<int>&,
+    void mw_create_table(QVector<QString>, QVector<QString>, QVector<int>,
                          int, QString);
 
     void insertRow(QString row);
@@ -64,6 +64,10 @@ private slots:
     void on_selectTableButton_clicked();
 
     void on_viewTableDataButton_clicked();
+
+    void on_createFromFile_clicked();
+
+    void on_insertFromFile_clicked();
 
 private:
     Ui::MainWindow *ui;

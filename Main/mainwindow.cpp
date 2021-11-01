@@ -6,12 +6,14 @@
 #include "../Delete/deletewindow.h"
 #include "../NewDB/newdbwindow.h"
 #include "../NewTable/newtablewindow.h"
+#include "../ImportCSV/columnnameswindow.h"
 
 #include "../Table/table.h"
 
 #include <QLabel>
 #include <QMessageBox>
 #include <QFileSystemModel>
+#include <QFileDialog>
 #include <QDir>
 
 #include <sstream>
@@ -96,7 +98,16 @@ void MainWindow::on_deleteDBButton_clicked()
     if (selected_db_name == "") return;
 
     QString db_path = QDir::currentPath() + "/DBs/" + selected_db_name;
-    QDir().rmdir(db_path);
+    if (!QDir().rmdir(db_path)) {
+        QMessageBox ms;
+        ms.setWindowTitle("Error");
+        ms.setText("Database must be empty in order to delete it.");
+        ms.exec();
+    }
+
+    if (selectedDB == selected_db_name) {
+        selectedDB = "";
+    }
 }
 
 
@@ -129,9 +140,9 @@ void MainWindow::on_newTableButton_clicked()
     newTableWindow.exec();
 }
 
-void MainWindow::mw_create_table(QVector<QString>& column_names,
-                              QVector<QString>& column_types,
-                              QVector<int>& column_sizes, int pk_pos,
+void MainWindow::mw_create_table(QVector<QString> column_names,
+                              QVector<QString> column_types,
+                              QVector<int> column_sizes, int pk_pos,
                               QString table_name)
 {
     std::stringstream communication_stream;
@@ -140,9 +151,12 @@ void MainWindow::mw_create_table(QVector<QString>& column_names,
         communication_stream << pk_pos << " ";
     for (int i = 0; i < column_names.size(); i++) {
         communication_stream << column_names[i].toStdString() << " ";
-        communication_stream << column_types[i].toStdString();
-        if (column_types[i] == "char") {
-            communication_stream << "(" << column_sizes[i] << ")";
+        if (column_types[i] == "Integer")
+            communication_stream << "int";
+        else if (column_types[i] == "Float")
+            communication_stream << "float";
+        else if (column_types[i] == "String") {
+            communication_stream << "char(" << column_sizes[i] << ")";
         }
 
         if (i == column_names.size()-1)
@@ -172,6 +186,9 @@ void MainWindow::on_pushButton_2_clicked()
 
     QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
                                                    selected_table_name;
+
+    if (selectedTable == selected_table_name)
+        selectedTable = "";
     QFile(path).remove();
 }
 
@@ -287,6 +304,7 @@ void MainWindow::insertRow(QString new_string) {
 
     QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
                                                    selectedTable;
+    std::clog << "Inserting in file " << path.toStdString() << std::endl;
     std::string table_path = path.toStdString();
     Table table(table_path);
 
@@ -480,3 +498,68 @@ void MainWindow::updateRow(QString searched_name, QString searched_value,
 
     table.update_rows(input);
 }
+
+
+void MainWindow::on_createFromFile_clicked()
+{
+    if (selectedDB == "")
+        return;
+    QString file_name = QFileDialog::getOpenFileName(this, "Open File", QString(),
+                                                    "csv(*.csv)");
+
+    QFile file(file_name);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    if (file.size() == 0) {
+        QMessageBox ms;
+        ms.setWindowTitle("Error");
+        ms.setText("Empty file.");
+        ms.exec();
+    }
+    else {
+        QString line;
+        QVector<QString> column_names;
+        bool try_again = true;
+        while (!file.atEnd() && try_again) {
+            try_again = false;
+            line = file.readLine().trimmed();
+            column_names = line.split(",");
+            if (column_names.size() == 0)   try_again = true;
+        }
+
+        if (column_names.size() == 0) {
+            // TODO: invalid file
+            return;
+        }
+
+        ColumnNamesWindow cnWindow(column_names, this);
+        cnWindow.setModal(true);
+        if (cnWindow.exec()) {
+            while (!file.atEnd()) {
+                line = file.readLine().trimmed();
+                line.replace(',', ' ');
+                insertRow(line);
+            }
+        }
+    }
+}
+
+
+void MainWindow::on_insertFromFile_clicked()
+{
+    if (selectedDB == "" || selectedTable == "")
+        return;
+    QString file_name = QFileDialog::getOpenFileName(this, "Open File", QString(),
+                                                    "csv(*.csv)");
+
+    QFile file(file_name);
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    QString line;
+    while (!file.atEnd()) {
+        line = file.readLine().trimmed();
+        line.replace(',', ' ');
+        insertRow(line);
+    }
+}
+

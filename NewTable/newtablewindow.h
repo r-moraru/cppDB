@@ -16,8 +16,8 @@ public:
     ~NewTableWindow();
 
 signals:
-    void readyToCreate(QVector<QString>& cn, QVector<QString>& ct,
-                       QVector<int>& cs, int pkp,
+    void readyToCreate(QVector<QString> cn, QVector<QString> ct,
+                       QVector<int> cs, int pkp,
                        QString tn);
 
 private slots:

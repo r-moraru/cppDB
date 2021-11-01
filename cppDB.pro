@@ -12,6 +12,7 @@ SOURCES += \
     BTree/btree.cpp \
     BTree/btreenode.cpp \
     Delete/deletewindow.cpp \
+    ImportCSV/columnnameswindow.cpp \
     Insert/insertwindow.cpp \
     main.cpp \
     Main/mainwindow.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
     Value/value.cpp
 
 HEADERS += \
+    ImportCSV/columnnameswindow.h \
     Value/base.h \
     BTree/btree.h \
     BTree/btreenode.h \
@@ -46,6 +48,7 @@ HEADERS += \
 
 FORMS += \
     Delete/deletewindow.ui \
+    ImportCSV/columnnameswindow.ui \
     Insert/insertwindow.ui \
     Main/mainwindow.ui \
     NewDB/newdbwindow.ui \

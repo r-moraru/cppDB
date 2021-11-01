@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -82,11 +82,25 @@
          </layout>
         </item>
         <item>
-         <widget class="QPushButton" name="newTableButton">
-          <property name="text">
-           <string>New Table</string>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="topMargin">
+           <number>0</number>
           </property>
-         </widget>
+          <item>
+           <widget class="QPushButton" name="newTableButton">
+            <property name="text">
+             <string>Create Table</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="createFromFile">
+            <property name="text">
+             <string>Create Table from .csv File</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -113,6 +127,13 @@
              <widget class="QPushButton" name="viewTableDataButton">
               <property name="text">
                <string>View Table Data</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="insertFromFile">
+              <property name="text">
+               <string>Insert Rows from .csv File</string>
               </property>
              </widget>
             </item>
@@ -165,6 +186,16 @@
   <action name="actionNew">
    <property name="text">
     <string>New</string>
+   </property>
+  </action>
+  <action name="actionImport_csv_File">
+   <property name="text">
+    <string>Import .csv File</string>
+   </property>
+  </action>
+  <action name="actionExport_as_csv_File">
+   <property name="text">
+    <string>Export as .csv File</string>
    </property>
   </action>
  </widget>
