@@ -52,15 +52,15 @@ void NewTableWindow::on_addColumnButton_clicked()
 
     column_names.push_back(new_column);
     if (ui->intRadioButton->isChecked()) {
-        column_types.push_back("int");
+        column_types.push_back("Integer");
         column_sizes.push_back(sizeof(int));
     }
     else if (ui->FloatRadioButton->isChecked()){
-        column_types.push_back("float");
+        column_types.push_back("Float");
         column_sizes.push_back(sizeof(float));
     }
     else if (ui->charRadioButton->isChecked()) {
-        column_types.push_back("char");
+        column_types.push_back("String");
         // TODO: check if line edits contain valid values
         column_sizes.push_back(ui->stringSizeLineEdit->text().toInt());
     }
