@@ -1,7 +1,7 @@
 #include "updatewindow.h"
 #include "ui_updatewindow.h"
 
-#include "mainwindow.h"
+#include "../Main/mainwindow.h"
 
 UpdateWindow::UpdateWindow(QWidget *parent) :
     QDialog(parent),
