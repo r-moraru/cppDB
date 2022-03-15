@@ -31,6 +31,7 @@ public:
     std::istream& update_rows(std::istream&);
     std::istream& delete_rows(std::istream&);
     std::ostream& select_rows(std::ostream&, std::istream&);
+    std::ostream& select_all_rows(std::ostream&);
 
     std::string name() { return n; }
 private:

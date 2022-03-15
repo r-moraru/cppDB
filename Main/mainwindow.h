@@ -42,6 +42,8 @@ public slots:
 
     void updateRow(QString, QString, QString, QString);
 
+    void exportCSV(QString, bool);
+
 private slots:
     void on_pushButton_11_clicked();
 
@@ -68,6 +70,8 @@ private slots:
     void on_createFromFile_clicked();
 
     void on_insertFromFile_clicked();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;

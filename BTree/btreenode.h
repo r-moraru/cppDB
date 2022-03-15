@@ -39,6 +39,7 @@ private:
 
     std::vector<std::vector<Value>> select_rows(Pager&, const Value&);
     std::vector<std::vector<Value>> select_rows(Pager&, int, const Value&);
+    std::vector<std::vector<Value>> select_all_rows(Pager&);
 
     void split_child(Pager&, int, const Value&);
     void insert_non_full(Pager&, const Value&, const std::vector<Value>&);

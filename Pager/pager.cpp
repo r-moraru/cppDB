@@ -259,6 +259,25 @@ vector<vector<Value>> Pager::select_rows(int column_position, const Value& val) 
     return selected_rows;
 }
 
+vector<vector<Value>> Pager::select_all_rows() {
+    vector<vector<Value>> selected_rows;
+
+    if (has_primary_key) {
+        selected_rows = btree.select_all_rows(*this);
+        return selected_rows;
+    }
+
+    while (read_next_page()) {
+        std::clog << "currently at page " << page_pos/page_size << std::endl;
+        vector<vector<Value>> new_selected_rows = get_page_rows();
+
+        std::copy(new_selected_rows.begin(), new_selected_rows.end(),
+                  std::back_inserter(selected_rows));
+    }
+
+    return selected_rows;
+}
+
 std::vector<std::vector<Value>> Pager::get_page_rows() {
     std::vector<std::vector<Value>> ret;
 
@@ -267,7 +286,7 @@ std::vector<std::vector<Value>> Pager::get_page_rows() {
 
     for (iter = sizeof(int); iter < end; ) {
         std::vector<Value> row;
-        for (int i = 0; i < column_names.size(); i++) {
+        for (size_t i = 0; i < column_names.size(); i++) {
             Value val(column_types[i], column_sizes[i]);
             read_from_buffer(val, page_data+iter, column_sizes[i]);
             row.push_back(val);
@@ -286,7 +305,7 @@ void Pager::delete_rows_from_page(int pos, const Value& val) {
 
     vector<vector<Value>> page_rows = get_page_rows();
 
-    for (int i = 0; i < page_rows.size(); i++) {
+    for (size_t i = 0; i < page_rows.size(); i++) {
         if (page_rows[i][pos] == val) deleted_pos.push_back(i);
     }
 

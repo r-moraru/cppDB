@@ -23,6 +23,7 @@ private:
 
     std::vector<std::vector<Value>> select_rows(Pager&, const Value&);
     std::vector<std::vector<Value>> select_rows(Pager&, int, const Value&);
+    std::vector<std::vector<Value>> select_all_rows(Pager&);
 
     void update_rows(Pager&, const Value&, int, const Value&);
     void update_rows(Pager&, int, const Value&, int, const Value&);

@@ -33,6 +33,7 @@ private:
     void update_rows(int, const Value&, int, const Value&);
     void update_rows_from_page(int, const Value&, int, const Value&);
     std::vector<std::vector<Value>> select_rows(int, const Value&);
+    std::vector<std::vector<Value>> select_all_rows();
     std::vector<std::vector<Value>> select_rows_from_page(int, const Value&);
     std::vector<std::vector<Value>> get_page_rows();
 

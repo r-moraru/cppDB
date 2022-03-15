@@ -403,3 +403,24 @@ std::vector<std::vector<Value>> BTreeNode::select_rows(Pager &pager, int key_pos
         return ch.select_rows(pager, key_pos, value);
     }
 }
+
+std::vector<std::vector<Value>> BTreeNode::select_all_rows(Pager &pager) {
+    using std::vector;
+
+    if (is_leaf) {
+        vector<vector<Value>> ret;
+        std::copy(data.begin(), data.begin()+n, std::back_inserter(ret));
+
+        if (next_leaf != -1) {
+            BTreeNode next = pager.read_node(next_leaf);
+            vector<vector<Value>> added_rows = next.select_all_rows(pager);
+            ret.insert(ret.end(), added_rows.begin(), added_rows.end());
+        }
+
+        return ret;
+    }
+    else {
+        BTreeNode ch = pager.read_node(c[0]);
+        return ch.select_all_rows(pager);
+    }
+}

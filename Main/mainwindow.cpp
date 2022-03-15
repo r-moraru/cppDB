@@ -3,10 +3,11 @@
 #include "../Insert/insertwindow.h"
 #include "../Select/selectwindow.h"
 #include "../Update/updatewindow.h"
-#include "../Delete/deletewindow.h"
+#include "../Delete/deleteWindow.h"
 #include "../NewDB/newdbwindow.h"
 #include "../NewTable/newtablewindow.h"
 #include "../ImportCSV/columnnameswindow.h"
+#include "../ExportCSV/exportwindow.h"
 
 #include "../Table/table.h"
 
@@ -560,6 +561,52 @@ void MainWindow::on_insertFromFile_clicked()
         line = file.readLine().trimmed();
         line.replace(',', ' ');
         insertRow(line);
+    }
+}
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    if (selectedDB == "" || selectedTable == "")
+        return;
+    ExportWindow exportWindow(this);
+    exportWindow.setModal(true);
+    exportWindow.exec();
+}
+
+void MainWindow::exportCSV(QString filename, bool includeColName) {
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Select a directory"),
+                                                    "/",
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks);
+    QString fullname = dir + "/" + filename + ".csv";
+    QFile file(fullname);
+    file.open(QIODevice::WriteOnly);
+
+    QString path = QDir::currentPath() + "/DBs/" + selectedDB + "/" +
+                                                   selectedTable;
+    std::string table_path = path.toStdString();
+    Table table(table_path);
+
+    QVector<QString> column_names = table.get_column_names();
+
+    if (includeColName) {
+        for (qsizetype i = 0; i < column_names.size(); i++) {
+            QString column = column_names[i];
+            file.write(column.toLocal8Bit().data());
+            if (i < column_names.size()-1) file.write(",");
+        }
+        file.write("\n");
+    }
+
+    std::stringstream rows;
+    table.select_all_rows(rows);
+    rows.seekg(0, std::ios::beg);
+
+    std::string line;
+    while (rows >> line) {
+        file.write(line.c_str());
+        file.write("\n");
     }
 }
 

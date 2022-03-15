@@ -33,6 +33,10 @@ std::vector<std::vector<Value>> BTree::select_rows(Pager &pager, int key_pos,
     return root.select_rows(pager, key_pos, key);
 }
 
+std::vector<std::vector<Value>> BTree::select_all_rows(Pager &pager) {
+    return root.select_all_rows(pager);
+}
+
 void BTree::remove(Pager& pager, const Value& k) {
     root.delete_from_node(pager, k);
 

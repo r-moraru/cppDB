@@ -197,6 +197,21 @@ std::ostream& Table::select_rows(std::ostream& os, std::istream& is) {
     return os;
 }
 
+std::ostream& Table::select_all_rows(std::ostream & os) {
+    vector<vector<Value>> selected_rows = pager.select_all_rows();
+
+    for (auto& row : selected_rows) {
+        for (size_t i = 0; i < row.size(); i++) {
+            auto &v = row[i];
+            os << v;
+            if (i < row.size()-1) os << ",";
+        }
+        os << "\n";
+    }
+
+    return os;
+}
+
 std::istream& Table::update_rows(std::istream& is) {
     // TODO: separate WHERE condition from updated column selection
     std::string searched_name;
