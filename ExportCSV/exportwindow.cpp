@@ -23,7 +23,7 @@ void ExportWindow::on_doneButton_clicked()
     QString filename = ui->fileNameLineEdit->text();
     bool includeColName = ui->includeColNames->isChecked();
 
-    QRegularExpression regexp("([a-z]|[A-Z]|_|-)?");
+    QRegularExpression regexp("^([a-z]|[A-Z]|_|-|[0-9])+$");
     QRegularExpressionMatch regMatch = regexp.match(filename);
 
     if (regMatch.hasMatch()) {
